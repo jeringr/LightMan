@@ -3305,7 +3305,7 @@ const UI = (() => {
     const ring = '<span class="ring"><svg viewBox="0 0 42 42" aria-hidden="true"><circle class="trk" cx="21" cy="21" r="18"/><circle class="arc" cx="21" cy="21" r="18" stroke-dasharray="' + CIRC.toFixed(1) + '" stroke-dashoffset="' + (CIRC * (1 - from)).toFixed(1) + '"/></svg><b>' + (cls === 'pass' ? '✓' : v.length) + '</b></span>';
     return '<button class="hero ' + cls + '" data-tab="guide" data-step="4" aria-label="' + esc(title) + '">' + ring + '<span><b>' + title + '</b><small>' + sub + '</small></span></button>' +
       pill('Face brightness', word(C('evFace'), 'Too dark', 'Too bright')) + pill('Shadows on face', word(C('keyFill'), 'Too flat', 'Too harsh')) +
-      pill('Stands out from background', word(C('backKey'), 'Too little', 'Too much')) + pill('Colour', colour);
+      pill('Stands out from background', word(C('backKey'), 'Too little', 'Too much')) + (colour[0] === 'pass' || colour[0] === 'na' ? pill('Colour', colour) : pill('Colour', colour).replace('<span class="pill ', '<span role="button" tabindex="0" data-tab="guide" data-step="4" style="cursor:pointer" title="How to fix this" class="pill '));
   }
   function setSimple(v) {
     App.simple = v; Data.setPref('mode', v ? 'simple' : 'expert');
@@ -3487,10 +3487,45 @@ const UI = (() => {
   /* A soft source (softbox / panel) only holds a beam of 45° or less with a grid on its front; spots are narrow by design. */
   const needsGrid = f => ['softbox', 'panel', 'fill'].includes(f.type) && f.beam <= 45;
   /* Plain-language verdicts for one evaluated state. Returns [{sev, text, fix}]. */
+  /* Step-by-step help for a "Poor" colour rating (low colour quality, CRI). Names the lights that cause it. */
+  function colourTip(verdicts) {
+    return mixedTip(verdicts) + poorTip(verdicts);
+  }
+  /* "Mixed": lamps of different colour temperature (K). The lamps that give most of the light set the colour to
+     match; the tip names the ones that are more than 300 K away from it (the same limit as the check). */
+  function mixedTip(verdicts) {
+    if (!verdicts.some(v => v.tip === 'cct')) return '';
+    const own = P().fixtures.filter(f => f.existing && f.enabled && f.cct != null), by = {};
+    own.forEach(f => { by[f.cct] = (by[f.cct] || 0) + (f.lumens || 1) * (f.dim == null ? 1 : f.dim / 100); });
+    const main = +Object.keys(by).sort((a, b) => by[b] - by[a])[0] || 0, odd = own.filter(f => Math.abs(f.cct - main) > 300);
+    const feel = k => k < 3300 ? 'warm' : k < 5000 ? 'neutral' : 'cool';
+    return '<details class="more" open style="margin-top:10px"><summary>How to fix mixed colour</summary>' +
+      '<p style="margin-top:8px"><b>Colour (K, Kelvin)</b> is printed on the lamp or its box. A low number such as 2700 K is warm and yellowish; a high number such as 6500 K is cool and bluish. The camera can correct only one of them, so every light on the person should have <b>the same K number</b>.</p>' +
+      (main && odd.length ? '<p>Most of your light is <b>' + main + ' K</b> (' + feel(main) + '). Different now: ' + odd.map(f => '<b>' + esc(f.name) + '</b> (' + Math.round(f.cct) + ' K)').join(', ') + '.</p>' : '') +
+      '<ol class="tight"><li><b>Check the numbers.</b> Open each light in My lights and type in the real K value from the lamp or box.</li>' +
+      '<li><b>Change the setting</b>, if the lamp has a colour switch or a warm/cool dial: set them all to the same value' + (main ? ' (' + main + ' K)' : '') + '.</li>' +
+      '<li><b>Switch off the ones that differ</b> while filming, or point them away from the people.</li>' +
+      '<li><b>Replace the bulbs that differ</b> with ones of the same K number as the rest.</li>' +
+      '<li><b>Daylight counts too.</b> A window is cool light (about 5500 K). Close the blinds, or use lamps of 5000 K or more.</li></ol>' +
+      '<p class="hint">Then set the camera\'s white balance to that K number, not to auto.</p>' +
+      '<div class="row" style="margin-top:8px">' + btn('Edit my lights', () => setTab('fixtures')) + '</div></details>';
+  }
+  function poorTip(verdicts) {
+    if (!verdicts.some(v => v.tip === 'cri')) return '';
+    const low = P().fixtures.filter(f => f.existing && f.enabled && f.cri != null && f.cri < 90);
+    return '<details class="more" open style="margin-top:10px"><summary>How to fix poor colour</summary>' +
+      '<p style="margin-top:8px"><b>Colour quality (CRI)</b> is a number up to 100 printed on the lamp or its box, as “CRI” or “Ra”. It says how naturally the light shows skin. For faces on camera it should be <b>90 or higher</b>.</p>' +
+      (low.length ? '<p>Below 90 now: ' + low.map(f => '<b>' + esc(f.name) + '</b> (CRI ' + Math.round(f.cri) + ')').join(', ') + '.</p>' : '') +
+      '<ol class="tight"><li><b>Check the number.</b> Open the light in My lights and type in the real CRI from the lamp or box. If you never entered it, the app is using a typical value.</li>' +
+      '<li><b>Dim it or switch it off while filming</b> and let the main and fill lights from the plan light the faces. This costs nothing.</li>' +
+      '<li><b>Point it away from the people</b>, if it can be aimed, so it only lights the room.</li>' +
+      '<li><b>Replace it</b> with a lamp or panel marked CRI 90 or higher (95 is ideal).</li></ol>' +
+      '<div class="row" style="margin-top:8px">' + btn('Edit my lights', () => setTab('fixtures')) + '</div></details>';
+  }
   function plainVerdicts(res) {
     const out = [], c = k => res.checks.find(x => x.key === k), rng = t => Fmt.target(t);
     const bad = x => x.status === 'fail' || x.status === 'warn', low = x => x.target.min != null && x.min < x.target.min;
-    const add = (x, text, fix) => out.push({ sev: x.status === 'fail' ? 'bad' : 'warn', text, fix });
+    const add = (x, text, fix, tip) => out.push({ sev: x.status === 'fail' ? 'bad' : 'warn', text, fix, tip });
     const ev = c('evFace'), kf = c('keyFill'), bk = c('backKey'), ct = c('cctSpread'), cr = c('cri'), eh = c('ehTask'), u0 = c('u0');
     if (ev.noData) out.push({ sev: 'warn', text: 'Faces cannot be checked yet.', fix: 'Place at least one person and one camera on the plan, and add your lights.' });
     else if (bad(ev)) low(ev) ? add(ev, 'Faces are too dark for the camera (' + Fmt.check(ev) + '; aim for ' + rng(ev.target) + '). The picture will look dull and grainy.', 'Add light in front of the person, or turn the front lights up.')
@@ -3499,8 +3534,8 @@ const UI = (() => {
       : add(kf, 'The light is harsh: one side of the face is much darker than the other (' + Fmt.check(kf) + '; aim for ' + rng(kf.target) + ').', 'Add or turn up a soft light on the dark side of the face.');
     if (!bk.noData && bad(bk)) low(bk) ? add(bk, 'The person blends into the background (' + Fmt.check(bk) + '; aim for ' + rng(bk.target) + ').', 'Add a small light behind and above the person, pointing at the back of the head and shoulders.')
       : add(bk, 'The light from behind is too strong (' + Fmt.check(bk) + ').', 'Turn the light behind the person down.');
-    if (!ct.noData && bad(ct)) add(ct, 'Your lights have different colours — some warm (yellowish), some cool (bluish), up to ' + Math.round(ct.max) + ' K apart. The camera cannot correct both at once.', 'Use lamps with the same “K” number (for example all 4000 K) for everything that lights the person.');
-    if (!cr.noData && bad(cr)) add(cr, 'Some lights show colours poorly (CRI ' + Math.round(cr.min) + '). Skin can look grey or slightly green on camera.', 'For lights that hit faces, buy lamps marked CRI 90 or higher (95+ is ideal).');
+    if (!ct.noData && bad(ct)) add(ct, 'Your lights have different colours — some warm (yellowish), some cool (bluish), up to ' + Math.round(ct.max) + ' K apart. The camera cannot correct both at once.', 'Use lamps with the same “K” number (for example all 4000 K) for everything that lights the person.', 'cct');
+    if (!cr.noData && bad(cr)) add(cr, 'Some lights show colours poorly (CRI ' + Math.round(cr.min) + '). Skin can look grey or slightly green on camera.', 'For lights that hit faces, buy lamps marked CRI 90 or higher (95+ is ideal).', 'cri');
     if (!eh.noData && bad(eh)) add(eh, 'The room itself is dim (' + Fmt.check(eh) + ' on the table; the workplace standard asks for ' + rng(eh.target) + ').', 'Turn the ceiling lights up or add ceiling lights.');
     if (!u0.noData && u0.status === 'fail') add(u0, 'Room light is patchy — bright spots and dark corners.', 'Spread the ceiling lights more evenly.');
     const kinds = new Set();
@@ -3595,6 +3630,7 @@ const UI = (() => {
     } else if (now.length) {
       s4 += '<h4>Do this</h4><ul class="tight">' + now.map(v => '<li>' + esc(v.fix) + '</li>').join('') + '</ul>';
     }
+    s4 += colourTip(todo.length ? left : now);
     h += step(4, 'Your lighting plan', todo.length ? todo.length + (todo.length === 1 ? ' change' : ' changes') : hasRec || !now.length ? 'nothing to change' : '', s4 + '<div class="row" style="margin-top:8px">' + go('report', 'Print shopping list') + '</div>' + nav(4, 'acted', 'I have done this'));
 
     h += step(5, 'Check on camera', '', '<p>Set your camera, then take a test shot.</p><ul class="tight"><li><b>White balance:</b> the K number of your lights, not auto</li><li><b>Exposure:</b> locked</li><li><b>Shutter:</b> 1/50 (50 Hz mains) or 1/60 (60 Hz mains)</li><li><b>ISO / gain:</b> as low as it goes</li></ul><div class="row">' + go('camera', 'Open camera check', 'primary') + '</div>' +

@@ -4,7 +4,7 @@
    ("stale-while-revalidate"). An updated app therefore appears the second time it is opened.
    Only this app's own files are handled; nothing is sent anywhere, and project data is not stored here
    (projects live in the browser's local storage). Bump CACHE to force every file to be fetched again. */
-const CACHE = 'lightidea-v5';
+const CACHE = 'lightidea-v7';
 const SHELL = ['./', 'index.html', 'LightIdea.html', 'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/favicon-32.png', 'screenshots/plan.jpg', 'screenshots/room-3d.jpg'];
 
 self.addEventListener('install', event => {
