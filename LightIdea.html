@@ -1990,7 +1990,17 @@ const Plan2D = (() => {
           const h = aimHandle(fx, zFace);
           if (raw.rec && mode === 'after') { const g = aimHandle(raw, zFace); o += '<line x1="' + X(raw.x) + '" y1="' + Y(raw.y) + '" x2="' + X(g[0]) + '" y2="' + Y(g[1]) + '" stroke="var(--na)" stroke-width="1.2" stroke-dasharray="2 4" clip-path="url(#roomClip)"/>'; }
           o += '<line x1="' + X(fx.x) + '" y1="' + Y(fx.y) + '" x2="' + X(h[0]) + '" y2="' + Y(h[1]) + '" stroke="' + col + '" stroke-width="1.6"' + (fx.existing && !(raw.rec && mode === 'after') ? '' : ' stroke-dasharray="6 4"') + ' marker-end="url(#arr)" opacity="0.9"/>';
-          const hx = clamp(X(h[0]), 8, vw - 8), hy = clamp(Y(h[1]), 8, vh - 8);
+          let hx = clamp(X(h[0]), 8, vw - 8), hy = clamp(Y(h[1]), 8, vh - 8);
+          /* A light usually points at a face, which would put its handle exactly on the person and make the person
+             impossible to grab with a finger. Pull the handle back along the beam, clear of the person's touch area. */
+          for (const q of P.presenters) {
+            const qx = X(q.x), qy = Y(q.y);
+            if (Math.hypot(hx - qx, hy - qy) < HANDLE_CLEAR) {
+              let ux = X(fx.x) - qx, uy = Y(fx.y) - qy; const ul = Math.hypot(ux, uy);
+              if (ul < 1) { ux = 0; uy = -1; } else { ux /= ul; uy /= ul; }
+              hx = clamp(qx + ux * HANDLE_CLEAR, 8, vw - 8); hy = clamp(qy + uy * HANDLE_CLEAR, 8, vh - 8);
+            }
+          }
           handles.push('<g data-drag="aim:' + fx.id + '"><circle cx="' + hx + '" cy="' + hy + '" r="16" fill="transparent"/><circle cx="' + hx + '" cy="' + hy + '" r="' + (selected ? 6 : 4.5) + '" fill="var(--room)" stroke="' + col + '" stroke-width="2"/></g>');
         }
       }
@@ -2054,12 +2064,25 @@ const Plan2D = (() => {
   /* ---- pointer interaction ---- */
   const toRoom = ev => { const r = svg.getBoundingClientRect(); return [(ev.clientX - r.left - ox) / s, (ev.clientY - r.top - oy) / s]; };
   const snap = v => Math.round(v * 20) / 20;
+  const HANDLE_CLEAR = 38, BODY_HIT = 24;      // px: how far a handle is kept from a person; touch radius of a person/camera
   function onDown(ev) {
     const t = ev.target.closest('[data-drag]');
     if (!t) { hooks.select(null); return; }
-    const [kind, id] = t.getAttribute('data-drag').split(':');
+    let [kind, id] = t.getAttribute('data-drag').split(':');
+    const app = hooks.app(), P = app.project, p = toRoom(ev);
+    /* Handles (○ aim, ◇ turn) are drawn on top, but a person or camera under the finger always wins,
+       so moving people never grabs a light's aim point by mistake. */
+    if (kind === 'aim' || kind === 'yaw') {
+      let best = BODY_HIT / s;
+      for (const q of P.presenters) { const d = Math.hypot(q.x - p[0], q.y - p[1]); if (d < best) { best = d; kind = 'presenter'; id = q.id; } }
+      for (const q of P.cameras) { const d = Math.hypot(q.x - p[0], q.y - p[1]); if (d < best) { best = d; kind = 'camera'; id = q.id; } }
+    }
     drag = { kind, id, sx: ev.clientX, sy: ev.clientY, moved: false, off: [0, 0] };
-    const P = hooks.app().project, p = toRoom(ev);
+    if (kind === 'aim') {
+      // the handle may be drawn beside its true aim point: keep that offset so the aim does not jump when grabbed
+      const f = P.fixtures.find(q => q.id === id), a = f && aimHandle(effective(f, app.mode), faceZ(P));
+      if (a && Math.hypot(a[0] - p[0], a[1] - p[1]) * s < 70) drag.off = [a[0] - p[0], a[1] - p[1]];
+    }
     const obj = kind === 'fixture' ? P.fixtures.find(f => f.id === id) : kind === 'presenter' ? P.presenters.find(q => q.id === id) : kind === 'camera' ? P.cameras.find(q => q.id === id) : kind === 'point' ? P.points.find(q => q.id === id) : kind === 'table' ? P.table : null;
     if (obj) drag.off = [obj.x - p[0], obj.y - p[1]];
     try { svg.setPointerCapture(ev.pointerId); } catch (e) { /* ignore */ }
@@ -2081,8 +2104,9 @@ const Plan2D = (() => {
     else if (kind === 'aim') {
       const f = P.fixtures.find(q => q.id === id); if (!f) return;
       // aim at the pointer on the face-height plane; snap onto a person's face when close
-      let target = [p[0], p[1], faceZ(P)];
-      for (const q of P.presenters) if (Math.hypot(q.x - p[0], q.y - p[1]) < 0.35) target = [q.x, q.y, q.eyeH];
+      const ax = p[0] + drag.off[0], ay = p[1] + drag.off[1];
+      let target = [ax, ay, faceZ(P)];
+      for (const q of P.presenters) if (Math.hypot(q.x - ax, q.y - ay) < 0.35) target = [q.x, q.y, q.eyeH];
       const a = Engine.aimAt([f.x, f.y, f.z], target), v = { pan: Math.round(a.pan), tilt: Math.round(a.tilt) };
       if (app.mode === 'after' && f.existing && f.rec) { Object.assign(f.rec, v); hooks.manual(); }
       else { Object.assign(f, v); if (!f.existing) hooks.manual(); }
