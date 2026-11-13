@@ -350,6 +350,21 @@ details.more[open] { padding-bottom: 14px; }
 /* ---- message with Undo ---- */
 #toast { display: flex; align-items: center; gap: 14px; }
 #toast.show { pointer-events: auto; }
+/* ---- action sheet: a short list of choices sliding up from the bottom (centred on wide screens) ---- */
+#asheet { position: fixed; inset: 0; z-index: 90; display: flex; align-items: flex-end; justify-content: center; background: rgba(0,0,0,.32); padding: 8px max(8px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); animation: asFade .2s ease-out; }
+#asheet[hidden] { display: none; }
+#asheet .as { width: 100%; max-width: 420px; display: grid; gap: 8px; animation: asUp .34s cubic-bezier(.22,1.15,.36,1); }
+#asheet .grp { background: color-mix(in srgb, var(--panel) 90%, transparent); -webkit-backdrop-filter: saturate(180%) blur(24px); backdrop-filter: saturate(180%) blur(24px); border-radius: 14px; overflow: hidden; }
+#asheet .ttl { padding: 12px 16px; text-align: center; font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--line); }
+#asheet button { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 56px; border: 0; background: none; color: var(--accent); font: inherit; font-size: 18px; cursor: pointer; }
+#asheet button svg { width: 20px; height: 20px; }
+#asheet .grp button + button { border-top: 1px solid var(--line); }
+#asheet button.destructive { color: #ff3b30; }
+#asheet button.cancel { font-weight: 600; }
+#asheet button:active { background: var(--fill); }
+@keyframes asFade { from { opacity: 0; } }
+@keyframes asUp { from { transform: translateY(60%); opacity: 0; } }
+@media (min-width: 901px) { #asheet { align-items: center; } }
 #toast button { flex: none; border: 0; background: none; padding: 4px 2px; font-weight: 600; color: #6cb2ff; cursor: pointer; }
 
 /* ---- welcome screen (first open, and New project) ---- */
@@ -422,8 +437,12 @@ details.more[open] { padding-bottom: 14px; }
   .camgrid { grid-template-columns: minmax(0, 1fr); }
   input[type="text"], input[type="number"], select, textarea { font-size: 16px; }     /* stops iOS zooming into fields */
   /* bottom sheet: grabber on top, content scrolls inside; height is set by the app (peek / half / full) */
-  #sidePane { position: fixed; left: 0; right: 0; bottom: calc(56px + env(safe-area-inset-bottom)); height: 42vh; z-index: 34; display: flex; flex-direction: column; border-radius: 18px 18px 0 0; box-shadow: 0 -1px 0 var(--line), 0 -10px 30px rgba(0,0,0,.14); transition: height .3s cubic-bezier(.3,.8,.3,1); }
+  #sidePane { position: fixed; left: 0; right: 0; bottom: calc(56px + env(safe-area-inset-bottom)); height: 42vh; z-index: 34; display: flex; flex-direction: column; border-radius: 18px 18px 0 0; box-shadow: 0 -1px 0 var(--line), 0 -10px 30px rgba(0,0,0,.14); transition: height .46s cubic-bezier(.22,1.2,.36,1); }      /* spring: settles with a slight overshoot */
   #sidePane.dragging { transition: none; }
+  body.sheet-peek #sheetBody { overflow: hidden; }      /* lowered sheet: a swipe up raises it instead of scrolling */
+  /* on-screen keyboard open: hide the tab bar and lift the sheet to sit on top of the keyboard */
+  body.kb #tabs { display: none; }
+  body.kb #sidePane { bottom: var(--kb, 0px); height: calc(var(--vvh, 100vh) * .62) !important; transition: none; }
   #grab { display: flex; flex: none; justify-content: center; align-items: center; height: 26px; touch-action: none; cursor: grab; }
   #grab::before { content: ''; width: 38px; height: 5px; border-radius: 3px; background: var(--fill2); }
   #sheetBody { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
@@ -506,6 +525,7 @@ details.more[open] { padding-bottom: 14px; }
   </section>
 </main>
 <div id="toast" role="status" aria-live="polite"></div>
+<div id="asheet" hidden></div>
 <div id="welcome" hidden>
   <div class="w">
     <img class="logo" alt="" src="data:image/webp;base64,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">
@@ -1788,6 +1808,9 @@ const Plan2D = (() => {
   'use strict';
   const DEG = Engine.DEG, clamp = Engine.clamp;
   let svg, hooks, s = 60, ox = 0, oy = 0, vw = 600, vh = 420, drag = null, queued = false;
+  /* Zoom (pinch, double-tap, Ctrl+wheel): zm multiplies the fit-to-view scale s0; panX/panY shift the room in px. */
+  let zm = 1, panX = 0, panY = 0, s0 = 60, pinch = null, lastTap = 0, zq = false;
+  const pts = new Map();                            // fingers currently on the plan
   const X = x => ox + x * s, Y = y => oy + y * s;
   const n1 = v => (Math.round(v * 10) / 10).toString();
   const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -1809,6 +1832,7 @@ const Plan2D = (() => {
     svg.addEventListener('pointermove', onMove);
     svg.addEventListener('pointerup', onUp);
     svg.addEventListener('pointercancel', onUp);
+    svg.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); zoomAt(e, zm * Math.exp(-e.deltaY * 0.01)); }, { passive: false });      // trackpad pinch
     if (window.ResizeObserver) new ResizeObserver(() => hooks.redraw()).observe(svg.parentElement);
     else window.addEventListener('resize', () => hooks.redraw());
   }
@@ -1820,7 +1844,10 @@ const Plan2D = (() => {
     if (svg.style.height !== h + 'px') svg.style.height = h + 'px';
     vw = w; vh = h;
     s = Math.min((w - 2 * pad) / room.L, (h - 2 * pad) / room.W);
-    ox = (w - room.L * s) / 2; oy = (h - room.W * s) / 2;
+    s0 = s; s *= zm;
+    if (zm === 1) panX = panY = 0;
+    else { panX = clamp(panX, -room.L * s / 2, room.L * s / 2); panY = clamp(panY, -room.W * s / 2, room.W * s / 2); }      // the room centre stays in view
+    ox = (w - room.L * s) / 2 + panX; oy = (h - room.W * s) / 2 + panY;
     svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
   }
 
@@ -1927,7 +1954,9 @@ const Plan2D = (() => {
     const isSel = (k, id) => sel.kind === k && sel.id === id, real = !!app.show.real;
     const x0 = X(0), y0 = Y(0), rw = room.L * s, rh = room.W * s;
     let o = '<defs><clipPath id="roomClip"><rect x="' + x0 + '" y="' + y0 + '" width="' + rw + '" height="' + rh + '"/></clipPath>' +
-      '<marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--ink)"/></marker>' + (real ? realDefs() : '') + '</defs>';
+      '<marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--ink)"/></marker>' + (real ? realDefs() : '') + '<filter id="liftSh" x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0" dy="5" stdDeviation="4" flood-opacity="0.38"/></filter></defs>';
+    /* The item under the finger is drawn lifted: slightly larger, with a shadow. */
+    const lift = (k, id, cx, cy) => drag && drag.moved && drag.kind === k && drag.id === id ? ' transform="translate(' + cx + ' ' + cy + ') scale(1.22) translate(' + (-cx) + ' ' + (-cy) + ')" filter="url(#liftSh)"' : '';
     o += '<rect x="' + x0 + '" y="' + y0 + '" width="' + rw + '" height="' + rh + '" fill="' + (real ? 'url(#floorPat)' : 'var(--room)') + '"/>';
 
     // ---- heat-map (horizontal illuminance on the work plane, calculated) ----
@@ -2005,7 +2034,7 @@ const Plan2D = (() => {
         }
       }
       const cx = X(fx.x), cy = Y(fx.y), r = 11;
-      let g = '<g data-drag="fixture:' + fx.id + '"' + (fx.enabled ? '' : ' opacity="0.55"') + '>';
+      let g = '<g data-drag="fixture:' + fx.id + '"' + lift('fixture', fx.id, cx, cy) + (fx.enabled ? '' : ' opacity="0.55"') + '>';
       if (selected) g += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r + 6) + '" fill="none" stroke="var(--accent)" stroke-width="2.5"/>';
       g += '<circle cx="' + cx + '" cy="' + cy + '" r="20" fill="transparent"/>';
       if (real) g += realFixture(fx, cx, cy, room); else {
@@ -2020,7 +2049,7 @@ const Plan2D = (() => {
     // ---- presenters (with shadow-direction arrow for their primary camera) ----
     for (const pr of P.presenters) {
       const cx = X(pr.x), cy = Y(pr.y), cam = Engine.primaryCamera(P, pr), selected = isSel('presenter', pr.id);
-      let g = '<g data-drag="presenter:' + pr.id + '">';
+      let g = '<g data-drag="presenter:' + pr.id + '"' + lift('presenter', pr.id, cx, cy) + '>';
       const rp = res && res.presenters.find(q => q.id === pr.id), rc = rp && rp.cams.find(c => c.primary);
       if (rc && rc.light && !real) g += '<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx - rc.light.vec[0] * 34) + '" y2="' + (cy - rc.light.vec[1] * 34) + '" stroke="var(--ink)" stroke-width="5" stroke-linecap="round" opacity="0.28"/>';
       if (selected) g += '<circle cx="' + cx + '" cy="' + cy + '" r="19" fill="none" stroke="var(--accent)" stroke-width="2.5"/>';
@@ -2034,7 +2063,7 @@ const Plan2D = (() => {
     // ---- cameras ----
     for (const c of P.cameras) {
       const cx = X(c.x), cy = Y(c.y), selected = isSel('camera', c.id);
-      let g = '<g data-drag="camera:' + c.id + '">';
+      let g = '<g data-drag="camera:' + c.id + '"' + lift('camera', c.id, cx, cy) + '>';
       if (selected) g += '<circle cx="' + cx + '" cy="' + cy + '" r="19" fill="none" stroke="var(--accent)" stroke-width="2.5"/>';
       g += '<circle cx="' + cx + '" cy="' + cy + '" r="21" fill="transparent"/>' + (real ? realCamera(cx, cy, c.yaw) : '<g transform="translate(' + cx + ',' + cy + ') rotate(' + c.yaw + ')"><rect x="-10" y="-8" width="17" height="16" rx="3" fill="var(--cam)" stroke="var(--room)" stroke-width="1.5"/><path d="M7 -4l8 -5v18l-8 -5z" fill="var(--cam)" stroke="var(--room)" stroke-width="1.5"/></g>');
       g += '<text class="lbl" x="' + cx + '" y="' + (cy + 27) + '" text-anchor="middle">' + esc(c.name) + '</text></g>';
@@ -2047,11 +2076,22 @@ const Plan2D = (() => {
       const cx = X(m.x), cy = Y(m.y), e = Engine.pointEh(P, mode, [m.x, m.y, m.z]);
       symbols.push('<g data-drag="point:' + m.id + '">' + (isSel('point', m.id) ? '<circle cx="' + cx + '" cy="' + cy + '" r="15" fill="none" stroke="var(--accent)" stroke-width="2.5"/>' : '') + '<circle cx="' + cx + '" cy="' + cy + '" r="18" fill="transparent"/><path d="M' + cx + ' ' + (cy - 8) + 'l8 8l-8 8l-8 -8z" fill="var(--room)" stroke="var(--ink)" stroke-width="1.8"/><path d="M' + (cx - 4) + ' ' + cy + 'h8M' + cx + ' ' + (cy - 4) + 'v8" stroke="var(--ink)" stroke-width="1.2"/><text class="lbl" x="' + cx + '" y="' + (cy + 22) + '" text-anchor="middle">' + esc(m.name) + ' · ' + Math.round(e) + ' lx' + (m.measured != null ? ' (meas. ' + Math.round(m.measured) + ')' : '') + '</text></g>');
     }
-    svg.innerHTML = o + symbols.join('') + handles.join('');
+    let top = '';
+    /* While something is being moved, show where it is (distance from the left and top walls) in a bubble above the finger. */
+    if (drag && drag.moved) {
+      const k = drag.kind, q = k === 'fixture' ? P.fixtures.find(f => f.id === drag.id) : k === 'presenter' ? P.presenters.find(f => f.id === drag.id) : k === 'camera' ? P.cameras.find(f => f.id === drag.id) : k === 'point' ? P.points.find(f => f.id === drag.id) : null;
+      if (q) {
+        const txt = '← ' + n1(Data.toDisp(q.x, u)) + ' ' + u + '   ↑ ' + n1(Data.toDisp(q.y, u)) + ' ' + u, bw = 132;
+        const bx = clamp(X(q.x), bw / 2 + 4, vw - bw / 2 - 4), by = Y(q.y) > 78 ? Y(q.y) - 56 : Y(q.y) + 56;
+        top += '<g pointer-events="none"><rect x="' + (bx - bw / 2) + '" y="' + (by - 14) + '" width="' + bw + '" height="28" rx="14" fill="var(--ink)" fill-opacity="0.88"/><text x="' + bx + '" y="' + (by + 4.5) + '" text-anchor="middle" font-size="12.5" font-weight="600" style="fill:var(--bg);font-variant-numeric:tabular-nums">' + txt + '</text></g>';
+      }
+    }
+    if (zm > 1.01) top += '<g data-zoomreset="1" style="cursor:pointer"><rect x="' + (vw - 78) + '" y="8" width="70" height="32" rx="16" fill="var(--panel)" stroke="var(--line)"/><text x="' + (vw - 43) + '" y="29" text-anchor="middle" font-size="13" font-weight="600" style="fill:var(--accent)">' + zm.toFixed(1) + '×  ✕</text></g>';
+    svg.innerHTML = o + symbols.join('') + handles.join('') + top;
 
     // ---- legend ----
     const lg = document.getElementById('legend');
-    if (lg) lg.innerHTML = real ? '<span>Glowing = a light that is on (its tint shows warm or cool)</span><span><i style="border:2px dashed var(--rec)"></i>Light to add</span><span>Floor brightness is calculated from your lights; the picture is illustrative</span><span>Showing: <b>' + (mode === 'before' ? (app.simple ? 'Now' : 'Before') : (app.simple ? 'With plan' : 'After')) + '</b> · drag anything to move it · drag ○ to point a light</span>' : app.simple ? '<span><i style="background:var(--existing)"></i>Light you have</span><span><i style="border:2px dashed var(--rec)"></i>Light to add</span><span><i style="background:var(--person)"></i>Person</span><span><i style="background:var(--cam);border-radius:3px"></i>Camera</span><span>Drag anything to move it · drag ○ to point a light</span>' :
+    if (lg) lg.innerHTML = real ? '<span>Glowing = a light that is on (its tint shows warm or cool)</span><span><i style="border:2px dashed var(--rec)"></i>Light to add</span><span>Floor brightness is calculated from your lights; the picture is illustrative</span><span>Showing: <b>' + (mode === 'before' ? (app.simple ? 'Now' : 'Before') : (app.simple ? 'With plan' : 'After')) + '</b> · drag anything to move it · drag ○ to point a light</span>' : app.simple ? '<span><i style="background:var(--existing)"></i>Light you have</span><span><i style="border:2px dashed var(--rec)"></i>Light to add</span><span><i style="background:var(--person)"></i>Person</span><span><i style="background:var(--cam);border-radius:3px"></i>Camera</span><span>Drag anything to move it · drag ○ to point a light · pinch to zoom</span>' :
       '<span><i style="background:var(--existing)"></i>Existing fixture</span>' +
       '<span><i style="border:2px dashed var(--rec)"></i>Recommended</span>' +
       '<span><i style="background:var(--person)"></i>Person (grey bar = shadow direction)</span>' +
@@ -2065,9 +2105,36 @@ const Plan2D = (() => {
   const toRoom = ev => { const r = svg.getBoundingClientRect(); return [(ev.clientX - r.left - ox) / s, (ev.clientY - r.top - oy) / s]; };
   const snap = v => Math.round(v * 20) / 20;
   const HANDLE_CLEAR = 38, BODY_HIT = 24;      // px: how far a handle is kept from a person; touch radius of a person/camera
+  /* Zoom to z keeping the room point (rx, ry) under the screen point (mx, my). */
+  function zoomTo(z, mx, my, rx, ry) {
+    const room = hooks.app().project.room;
+    zm = clamp(z, 1, 5);
+    if (zm <= 1.02) { zm = 1; panX = panY = 0; }
+    else { const sn = s0 * zm; panX = mx - (vw - room.L * sn) / 2 - rx * sn; panY = my - (vh - room.W * sn) / 2 - ry * sn; }
+    redrawSoon();
+  }
+  function zoomAt(ev, z) { const r = svg.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top; zoomTo(z, mx, my, (mx - ox) / s, (my - oy) / s); }
+  function redrawSoon() { if (!zq) { zq = true; requestAnimationFrame(() => { zq = false; hooks.redraw(); }); } }
+  const pinchMid = () => { const [a, b] = [...pts.values()], r = svg.getBoundingClientRect(); return [(a[0] + b[0]) / 2 - r.left, (a[1] + b[1]) / 2 - r.top, Math.hypot(a[0] - b[0], a[1] - b[1]) || 1]; };
   function onDown(ev) {
+    pts.set(ev.pointerId, [ev.clientX, ev.clientY]);
+    try { svg.setPointerCapture(ev.pointerId); } catch (e) { /* ignore */ }
+    if (pts.size === 2) {                          // second finger: stop moving things and start a pinch
+      if (drag) { const d = drag; drag = null; if (d.moved && d.kind !== 'pan') hooks.end(d.kind === 'aim' ? 'fixture' : d.kind === 'yaw' ? 'camera' : d.kind, d.id); }
+      const m = pinchMid();
+      pinch = { d0: m[2], z0: zm, rx: (m[0] - ox) / s, ry: (m[1] - oy) / s };
+      ev.preventDefault(); return;
+    }
+    if (pts.size > 2) return;
+    if (ev.target.closest('[data-zoomreset]')) { zm = 1; panX = panY = 0; hooks.redraw(); return; }
     const t = ev.target.closest('[data-drag]');
-    if (!t) { hooks.select(null); return; }
+    if (!t) {
+      const now = performance.now();
+      if (now - lastTap < 320) { lastTap = 0; zoomAt(ev, zm > 1.01 ? 1 : 2.2); return; }      // double-tap: zoom in / back out
+      lastTap = now;
+      if (zm > 1.01) { drag = { kind: 'pan', sx: ev.clientX, sy: ev.clientY, px: panX, py: panY, moved: false }; ev.preventDefault(); return; }      // zoomed in: one finger on empty floor pans
+      hooks.select(null); return;
+    }
     let [kind, id] = t.getAttribute('data-drag').split(':');
     const app = hooks.app(), P = app.project, p = toRoom(ev);
     /* Handles (○ aim, ◇ turn) are drawn on top, but a person or camera under the finger always wins,
@@ -2089,9 +2156,12 @@ const Plan2D = (() => {
     ev.preventDefault();
   }
   function onMove(ev) {
+    if (pts.has(ev.pointerId)) pts.set(ev.pointerId, [ev.clientX, ev.clientY]);
+    if (pinch) { if (pts.size >= 2) { const m = pinchMid(); zoomTo(pinch.z0 * m[2] / pinch.d0, m[0], m[1], pinch.rx, pinch.ry); } return; }
     if (!drag) return;
     if (!drag.moved && Math.hypot(ev.clientX - drag.sx, ev.clientY - drag.sy) < 5) return;
     drag.moved = true;
+    if (drag.kind === 'pan') { panX = drag.px + ev.clientX - drag.sx; panY = drag.py + ev.clientY - drag.sy; redrawSoon(); return; }
     const app = hooks.app(), P = app.project, room = P.room, p = toRoom(ev);
     const px = clamp(snap(p[0] + drag.off[0]), 0, room.L), py = clamp(snap(p[1] + drag.off[1]), 0, room.W);
     const { kind, id } = drag;
@@ -2114,8 +2184,11 @@ const Plan2D = (() => {
     if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; hooks.live(); }); }
   }
   function onUp(ev) {
+    pts.delete(ev.pointerId);
+    if (pinch) { if (pts.size < 2) pinch = null; return; }
     if (!drag) return;
     const d = drag; drag = null;
+    if (d.kind === 'pan') { if (!d.moved) hooks.select(null); return; }
     try { svg.releasePointerCapture(ev.pointerId); } catch (e) { /* ignore */ }
     const selKind = d.kind === 'aim' ? 'fixture' : d.kind === 'yaw' ? 'camera' : d.kind;
     if (d.moved) hooks.end(selKind, d.id); else hooks.select(selKind, d.id);
@@ -2992,11 +3065,26 @@ const UI = (() => {
   };
   const icon = k => ICON[k] ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICON[k] + '</svg>' : '';
   const WIDE = new Set(['camera', 'report', 'method', 'selftest']);       // tabs that use the full width (plan hidden)
+  /* Is the current tab covering the plan right now? On a phone a full-width tab can be lowered (App.wideDown)
+     to look at the plan, by tapping its tab-bar button again or by pulling the grabber down. */
+  const wideNow = () => WIDE.has(App.tab) && !(App.wideDown && isPhone());
   const P = () => App.project;
   let handlers = [], saveTimer = 0, toastTimer = 0, saveWarned = false, ptrDown = false, pendingPanel = false;
   const reg = fn => handlers.push(fn) - 1;
 
   /* Short message at the bottom. With 'undo', it carries an Undo button for the change that was just made. */
+  /* A short list of choices sliding up from the bottom, as on a phone. items: [{ label, fn, ico, destructive }] */
+  function actionSheet(title, items) {
+    const a = $('asheet');
+    a.innerHTML = '<div class="as" role="dialog" aria-modal="true" aria-label="' + esc(title) + '"><div class="grp"><div class="ttl">' + esc(title) + '</div>' +
+      items.map((it, i) => '<button type="button" data-a="' + i + '"' + (it.destructive ? ' class="destructive"' : '') + '>' + (it.ico ? icon(it.ico) : '') + esc(it.label) + '</button>').join('') +
+      '</div><div class="grp"><button type="button" class="cancel">Cancel</button></div></div>';
+    a.hidden = false;
+    const key = e => { if (e.key === 'Escape') close(); };
+    const close = () => { a.hidden = true; a.innerHTML = ''; document.removeEventListener('keydown', key); };
+    document.addEventListener('keydown', key);
+    a.onclick = e => { const b = e.target.closest('button'); if (!b && e.target !== a) return; close(); if (b && b.dataset.a) items[+b.dataset.a].fn(); };
+  }
   function toast(text, undo) {
     const t = $('toast');
     t.innerHTML = '<span>' + esc(text) + '</span>' + (undo ? '<button type="button">Undo</button>' : '');
@@ -3046,7 +3134,7 @@ const UI = (() => {
     render(o);
   }
   function render(o = {}) {
-    document.body.classList.toggle('wide', WIDE.has(App.tab));
+    document.body.classList.toggle('wide', wideNow());
     document.body.classList.toggle('simple', App.simple);
     applySheet();
     Plan2D.render(App);
@@ -3060,7 +3148,7 @@ const UI = (() => {
     const v = App.view === 'cam' && !P().cameras.length ? '3d' : App.view, top = v === 'top';
     $('plan').toggleAttribute('hidden', !top); $('plan3d').toggleAttribute('hidden', top); $('tglReal').hidden = !top;      // SVG elements have no .hidden property
     $('viewTop').className = top ? 'on' : ''; $('view3d').className = v === '3d' ? 'on' : ''; $('viewCam').className = v === 'cam' ? 'on' : '';
-    if (top || WIDE.has(App.tab)) return;
+    if (top || wideNow()) return;
     View3D.render(App, v);
     $('legend').innerHTML = (v === 'cam' ? '<span>Roughly what <b>' + esc(View3D.cameraName() || 'the camera') + '</b> sees. A real camera sets its own exposure, so judge the balance of light, not the overall brightness.</span>'
       : '<span>Drag to turn the room.</span><span><i style="border:2px dashed var(--rec)"></i>Light to add</span>') +
@@ -3069,8 +3157,16 @@ const UI = (() => {
   function setView(v) { App.view = v; Data.setPref('view', v); render({ light: true }); if (v === 'top') Plan2D.render(App); }
   function setTab(t) {
     if (App.tab === 'camera' && t !== 'camera') Camera.pause();
+    App.wideDown = false;
     App.tab = t; render();
     if (WIDE.has(t)) window.scrollTo({ top: 0 });
+  }
+  /* Phone: the tab-bar button of the tab that is already open works as a toggle — sheet down to see the plan,
+     and up again (the same idea as tapping the grabber). The live camera is paused while its sheet is down. */
+  function toggleSheet() {
+    if (WIDE.has(App.tab)) { App.wideDown = !App.wideDown; if (App.wideDown && App.tab === 'camera') Camera.pause(); }
+    else App.sheet = App.sheet === 'peek' ? 'half' : 'peek';
+    render();
   }
   function select(kind, id) {
     App.sel = kind ? { kind, id } : null;
@@ -3230,8 +3326,9 @@ const UI = (() => {
   let sheetNow = 0;                                 // current height in px (0 = not a sheet)
   function applySheet() {
     const el = $('sidePane');
-    if (!isPhone()) { el.style.height = ''; sheetNow = 0; return; }
-    sheetNow = sheetPx(WIDE.has(App.tab) ? 'full' : App.sheet);      // camera, report … have no plan to show: use the whole height
+    if (!isPhone()) { el.style.height = ''; sheetNow = 0; document.body.classList.remove('sheet-peek'); return; }
+    sheetNow = sheetPx(WIDE.has(App.tab) ? (App.wideDown ? 'peek' : 'full') : App.sheet);      // camera, report … have no plan to show: use the whole height
+    document.body.classList.toggle('sheet-peek', sheetNow <= sheetPx('peek') + 2);
     if (!el.classList.contains('dragging')) el.style.height = sheetNow + 'px';
   }
   /* Height the plan may use on a phone: from its top edge down to the top of the sheet. */
@@ -3241,20 +3338,72 @@ const UI = (() => {
   }
   function initSheet() {
     const el = $('sidePane'), grab = $('grab');
+    const body = $('sheetBody');
     let d = null;
-    grab.addEventListener('pointerdown', e => { d = { y: e.clientY, h: el.getBoundingClientRect().height, moved: false }; el.classList.add('dragging'); try { grab.setPointerCapture(e.pointerId); } catch (x) { /* ignore */ } e.preventDefault(); });
-    grab.addEventListener('pointermove', e => { if (!d) return; if (Math.abs(e.clientY - d.y) > 5) d.moved = true; el.style.height = clamp(d.h + d.y - e.clientY, sheetPx('peek'), sheetPx('full')) + 'px'; });
-    const up = e => {
+    const lo = () => sheetPx('peek'), hi = () => sheetPx('full');
+    const begin = y => { d = { y, h: el.getBoundingClientRect().height, moved: false, ly: y, lt: performance.now(), v: 0 }; el.classList.add('dragging'); };
+    const move = y => {
       if (!d) return;
-      const hNow = el.getBoundingClientRect().height, moved = d.moved; d = null;
-      el.classList.remove('dragging');
-      if (moved) App.sheet = ['peek', 'half', 'full'].reduce((a, b) => Math.abs(sheetPx(b) - hNow) < Math.abs(sheetPx(a) - hNow) ? b : a);
-      else App.sheet = App.sheet === 'peek' ? 'half' : App.sheet === 'half' ? 'full' : 'half';
-      render({ light: true });
-      try { grab.releasePointerCapture(e.pointerId); } catch (x) { /* ignore */ }
+      if (Math.abs(y - d.y) > 5) d.moved = true;
+      const now = performance.now(), dt = Math.max(1, now - d.lt);
+      d.v = 0.7 * d.v + 0.3 * (d.ly - y) / dt; d.ly = y; d.lt = now;      // finger speed, px per ms, upwards positive
+      let hh = d.h + d.y - y;
+      if (hh > hi()) hh = hi() + (hh - hi()) * 0.25; else if (hh < lo()) hh = lo() - (lo() - hh) * 0.25;      // rubber band past either end
+      el.style.height = Math.max(60, hh) + 'px';
     };
-    grab.addEventListener('pointerup', up); grab.addEventListener('pointercancel', up);
-    grab.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); App.sheet = App.sheet === 'peek' ? 'half' : App.sheet === 'half' ? 'full' : 'peek'; render({ light: true }); } });
+    /* Let go: settle on the stop the sheet is heading for (a flick carries it to the next one). tap: step to the next stop. */
+    const end = tap => {
+      if (!d) return;
+      const hNow = el.getBoundingClientRect().height, moved = d.moved, v = d.v; d = null;
+      el.classList.remove('dragging');
+      const wide = WIDE.has(App.tab), stops = wide ? ['peek', 'full'] : ['peek', 'half', 'full'];      // camera, report …: open or lowered only
+      const cur = wide ? (App.wideDown ? 'peek' : 'full') : App.sheet;
+      let to = cur;
+      if (moved) { const aim = hNow + v * 180; to = stops.reduce((p, q) => Math.abs(sheetPx(q) - aim) < Math.abs(sheetPx(p) - aim) ? q : p); }
+      else if (tap) to = wide ? (cur === 'peek' ? 'full' : 'peek') : cur === 'peek' ? 'half' : cur === 'half' ? 'full' : 'half';
+      if (wide) { App.wideDown = to === 'peek'; if (App.wideDown && App.tab === 'camera') Camera.pause(); if (to === cur) applySheet(); else render(); }
+      else { App.sheet = to; render({ light: true }); }
+    };
+    grab.addEventListener('pointerdown', e => { begin(e.clientY); try { grab.setPointerCapture(e.pointerId); } catch (x) { /* ignore */ } e.preventDefault(); });
+    grab.addEventListener('pointermove', e => move(e.clientY));
+    grab.addEventListener('pointerup', () => end(true)); grab.addEventListener('pointercancel', () => end(false));
+    grab.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (WIDE.has(App.tab)) { toggleSheet(); return; } App.sheet = App.sheet === 'peek' ? 'half' : App.sheet === 'half' ? 'full' : 'peek'; render({ light: true }); } });
+    /* The sheet also follows a finger on its content: pull down from the top of the content to lower it,
+       swipe up on a lowered sheet to raise it. Anything else is ordinary scrolling. */
+    let t0 = null;
+    body.addEventListener('touchstart', e => {
+      t0 = null;
+      if (!isPhone() || e.touches.length !== 1 || e.target.closest('input[type="range"], canvas, select, .stage')) return;
+      t0 = { x: e.touches[0].clientX, y: e.touches[0].clientY, on: false };
+    }, { passive: true });
+    body.addEventListener('touchmove', e => {
+      if (!t0) return;
+      const y = e.touches[0].clientY, dy = y - t0.y, dx = e.touches[0].clientX - t0.x;
+      if (!t0.on) {
+        if (Math.abs(dy) < 6) return;
+        const peek = document.body.classList.contains('sheet-peek');
+        if (Math.abs(dx) > Math.abs(dy) || !e.cancelable || !((dy > 0 && body.scrollTop <= 0) || (dy < 0 && peek))) { t0 = null; return; }
+        t0.on = true; begin(y);
+      }
+      e.preventDefault(); move(y);
+    }, { passive: false });
+    const tEnd = () => { if (t0 && t0.on) end(false); t0 = null; };
+    body.addEventListener('touchend', tEnd); body.addEventListener('touchcancel', tEnd);
+    /* On-screen keyboard (iOS keeps the page size and covers the bottom): lift the sheet above it and keep the field in view. */
+    if (window.visualViewport) {
+      const vv = window.visualViewport;
+      const kb = () => {
+        const f = document.activeElement, typing = !!f && /^(INPUT|TEXTAREA)$/.test(f.tagName) && !/^(range|checkbox|radio|file|button)$/.test(f.type || '');
+        const gap = window.innerHeight - vv.height - vv.offsetTop, on = isPhone() && typing && gap > 120 && Math.abs(vv.scale - 1) < 0.05;
+        document.documentElement.style.setProperty('--kb', (on ? Math.round(gap) : 0) + 'px');
+        document.documentElement.style.setProperty('--vvh', Math.round(vv.height) + 'px');
+        if (document.body.classList.contains('kb') === on) return;
+        document.body.classList.toggle('kb', on);
+        if (on && el.contains(f)) setTimeout(() => f.scrollIntoView({ block: 'center' }), 80);
+      };
+      vv.addEventListener('resize', kb); vv.addEventListener('scroll', kb);
+      document.addEventListener('focusout', () => setTimeout(kb, 100));
+    }
     window.addEventListener('resize', () => { if (App.res.after) render({ light: true }); });
   }
   /* ---- in-place editor for whatever is selected on the plan (Simple mode) ----
@@ -3272,7 +3421,10 @@ const UI = (() => {
             (f.dist === 'file' || f.outputMode === 'candela' ? '' : fNum('Brightness', f.lumens, S(v => { f.lumens = v; }), { unit: 'lumens', nullable: true, min: 0, prov: { obj: f.prov, key: 'output' }, hideProv: true })) +
             fNum('Colour', f.cct, S(v => { f.cct = v; }), { unit: 'K', nullable: true, min: 1500, max: 12000, prov: { obj: f.prov, key: 'cct' }, hideProv: true }) +
             fRange('Dimmer', f.dim, S(v => { f.dim = v; }), 0, 100, 1, ' %') + '</div><div class="row">' + fCheck('Switched on', f.enabled, S(v => { f.enabled = v; })) + '<span class="spacer"></span>' +
-            btn('More…', () => { App.tab = 'fixtures'; render(); }) + btn('Delete', () => { p.fixtures.splice(p.fixtures.indexOf(f), 1); if (!f.existing) manual(); App.sel = null; commit(); toast('“' + f.name + '” deleted.', true); }, 'danger') + '</div>';
+            btn('More…', () => actionSheet(f.name, [
+              { label: 'All settings', ico: 'sliders', fn: () => { App.tab = 'fixtures'; render(); } },
+              ...(f.existing ? [{ label: 'Duplicate', ico: 'plus', fn: () => { const c = JSON.parse(JSON.stringify(f)); delete c.rec; c.id = Data.uid('f', p.fixtures); c.name = f.name + ' copy'; c.x = clamp(f.x + 0.5, 0, p.room.L); p.fixtures.push(c); App.sel = { kind: 'fixture', id: c.id }; commit(); toast('“' + f.name + '” duplicated. Drag the copy to its place.', true); } }] : []),
+              { label: 'Delete', ico: 'trash', destructive: true, fn: () => { p.fixtures.splice(p.fixtures.indexOf(f), 1); if (!f.existing) manual(); App.sel = null; commit(); toast('“' + f.name + '” deleted.', true); } }])) + '</div>';
         }
       } else if (s.kind === 'presenter') {
         const pr = p.presenters.find(x => x.id === s.id);
@@ -3855,7 +4007,7 @@ const UI = (() => {
     const up = () => { ptrDown = false; if (pendingPanel) setTimeout(() => { if (pendingPanel && !ptrDown) renderPanel(); }, 0); };
     document.addEventListener('pointerup', up, true); document.addEventListener('pointercancel', up, true);
 
-    const tabClick = e => { const b = e.target.closest('[data-tab]'); if (!b) return; if (b.dataset.step) App.step = +b.dataset.step; setTab(b.getAttribute('data-tab')); };
+    const tabClick = e => { const b = e.target.closest('[data-tab]'); if (!b) return; const t = b.getAttribute('data-tab'); if (t === App.tab && isPhone() && !b.dataset.step) { toggleSheet(); return; } if (b.dataset.step) App.step = +b.dataset.step; setTab(t); };
     $('tabs').addEventListener('click', tabClick); $('score').addEventListener('click', tabClick);
     $('projName').addEventListener('change', e => { P().name = e.target.value.trim() || 'Untitled'; commit({ noRec: true }); });
     $('btnUndo').addEventListener('click', () => applyHistory(Data.undo()));
