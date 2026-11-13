@@ -25,7 +25,7 @@ It is free, works offline, and runs entirely in your browser. Nothing is uploade
 
 ## Put it on an iPhone
 
-1. Open the app page (`[LightIdea.html](https://jeringr.github.io/LightMan/)`) in Safari.
+1. Open the app page (`(https://jeringr.github.io/LightMan/)`) in Safari.
 2. Tap Share, then **Add to Home Screen**.
 3. Open it once from the new icon while online. After that it works with no connection.
 
@@ -39,8 +39,7 @@ Projects are saved inside the browser or the home-screen app. Use **Save project
 | `LightIdea.html` | The app. It also works on its own when opened from disk |
 | `manifest.webmanifest` | App name, icon and full-screen settings for installing |
 | `sw.js` | Offline cache |
-| `icons/` | App icons |
-| `screenshots/` | Pictures used on the introduction page and in this file |
+
 
 To host it, upload all of these to any static HTTPS host, such as GitHub Pages, keeping the folders as they are. There is no build step.
 
