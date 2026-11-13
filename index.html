@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>LightIdea — light your video like a studio</title>
+<meta name="description" content="LightIdea plans and checks the lighting for video calls, interviews and recordings. No lighting knowledge needed. Free, offline, runs in your browser.">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<!-- Introduction page for the site's root address. The app itself is LightIdea.html.
+     Self-contained: no external fonts, scripts or requests. -->
+<style>
+:root {
+  --bg: #f2f2f7; --panel: #ffffff; --ink: #1c1c1e; --muted: #6a6a70; --line: #e3e3e8; --accent: #0071e3; --accent-ink: #fff; --fill: rgba(118,118,128,.12);
+  --shadow: 0 1px 2px rgba(0,0,0,.04), 0 6px 20px rgba(0,0,0,.06);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #000; --panel: #1c1c1e; --ink: #f5f5f7; --muted: #a1a1a8; --line: #38383b; --accent: #0a84ff; --fill: rgba(118,118,128,.24); --shadow: 0 0 0 1px rgba(255,255,255,.06); }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 max(20px, env(safe-area-inset-right)) 0 max(20px, env(safe-area-inset-left)); }
+h1, h2, h3 { margin: 0; line-height: 1.15; letter-spacing: -.025em; }
+h1 { font-size: clamp(34px, 7vw, 56px); font-weight: 700; }
+h2 { font-size: clamp(24px, 4vw, 32px); font-weight: 700; margin-bottom: 18px; }
+h3 { font-size: 17px; font-weight: 600; letter-spacing: -.01em; margin-bottom: 4px; }
+p { margin: 0 0 10px; }
+a { color: var(--accent); }
+.muted { color: var(--muted); }
+
+header { text-align: center; padding: 64px 0 40px; }
+header img { width: 112px; height: 112px; border-radius: 26px; box-shadow: 0 12px 34px rgba(0,0,0,.2), 0 0 0 .5px rgba(0,0,0,.08); }
+header h1 { margin: 26px 0 12px; }
+header .lead { font-size: clamp(17px, 2.4vw, 21px); color: var(--muted); max-width: 34em; margin: 0 auto 26px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; min-height: 50px; padding: 12px 26px; border-radius: 14px; background: var(--accent); color: var(--accent-ink); font-size: 17px; font-weight: 600; text-decoration: none; transition: transform .1s, filter .15s; }
+.btn:hover { filter: brightness(1.08); } .btn:active { transform: scale(.97); }
+.btn svg { width: 18px; height: 18px; }
+.sub { margin-top: 12px; font-size: 14px; color: var(--muted); }
+
+section { padding: 34px 0; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.card { background: var(--panel); border-radius: 18px; padding: 20px 22px; box-shadow: var(--shadow); }
+.card p { margin: 0; color: var(--muted); font-size: 15px; }
+.shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.shots figure { margin: 0; background: var(--panel); border-radius: 18px; padding: 10px; box-shadow: var(--shadow); }
+.shots img { display: block; width: 100%; height: auto; border-radius: 10px; }
+.shots figcaption { padding: 10px 8px 4px; font-size: 14px; color: var(--muted); }
+ol.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; counter-reset: s; }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 40px 1fr; gap: 14px; align-items: start; background: var(--panel); border-radius: 16px; padding: 16px 20px; box-shadow: var(--shadow); }
+ol.steps li::before { content: counter(s); width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-weight: 700; display: grid; place-items: center; }
+ol.steps p { margin: 0; color: var(--muted); font-size: 15px; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.card ol, .card ul { margin: 6px 0 0; padding-left: 20px; color: var(--muted); font-size: 15px; }
+.card li { margin: 4px 0; }
+footer { text-align: center; padding: 40px 0 max(48px, env(safe-area-inset-bottom)); color: var(--muted); font-size: 15px; border-top: 1px solid var(--line); margin-top: 20px; }
+footer b { color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <img src="icons/icon-192.png" alt="LightIdea app icon: a studio light">
+  <h1>Light your video like a studio</h1>
+  <p class="lead">LightIdea plans and checks the lighting for video calls, interviews and recordings. You describe your room; it tells you what to change, what to buy and where to put it. No lighting knowledge needed.</p>
+  <a class="btn" href="LightIdea.html">Open the app
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
+  <p class="sub">Free · works offline · nothing to install or sign up for</p>
+</header>
+
+<section aria-labelledby="what">
+  <h2 id="what">What it does</h2>
+  <div class="cards">
+    <div class="card"><h3>Finds the problems</h3><p>Faces too dark, flat or harsh shadows, mixed warm and cool lamps, a window behind the speaker. Each one is explained in plain words.</p></div>
+    <div class="card"><h3>Gives you a plan</h3><p>A numbered to-do list: re-aim the lights you already own first, then what to buy, where to mount it, where to point it and how bright to set it.</p></div>
+    <div class="card"><h3>Shows the result</h3><p>A top-down plan, a realistic view of light on the floor, a 3D view you can turn, and a view from the camera's position.</p></div>
+    <div class="card"><h3>Checks with your camera</h3><p>Take a test photo and the app points out burnt-out areas, lost shadows and uneven faces, with one thing to do about each.</p></div>
+  </div>
+</section>
+
+<section aria-label="Screenshots">
+  <div class="shots">
+    <figure><img src="screenshots/plan.jpg" width="514" height="321" alt="LightIdea showing a meeting room from above with lights, people and the lighting plan beside it" loading="lazy"><figcaption>The plan from above, with the step-by-step guide beside it.</figcaption></figure>
+    <figure><img src="screenshots/room-3d.jpg" width="514" height="321" alt="LightIdea showing the same room in a 3D view with people at a table and lights on stands" loading="lazy"><figcaption>The same room in 3D, lit by the planned lights.</figcaption></figure>
+  </div>
+</section>
+
+<section aria-labelledby="how">
+  <h2 id="how">How to use it</h2>
+  <ol class="steps">
+    <li><div><h3>Describe your room</h3><p>Measure the length, width and ceiling height with a tape and type them in.</p></div></li>
+    <li><div><h3>Say what you are filming</h3><p>Pick the closest match, such as one person talking to the camera or a meeting table. People and camera are placed for you; drag them to where they really are.</p></div></li>
+    <li><div><h3>Add the lights you already have</h3><p>Drag each light to its place and copy two numbers from the lamp or its box: lumens (how bright) and Kelvin (how warm or cool).</p></div></li>
+    <li><div><h3>Follow the lighting plan</h3><p>Read what is wrong today, then work through the to-do list. The status ring at the top fills as problems are solved.</p></div></li>
+    <li><div><h3>Check on camera</h3><p>Set the camera as the app suggests, take a test shot in the Camera tab, and fine-tune the dimmers.</p></div></li>
+  </ol>
+</section>
+
+<section aria-labelledby="more">
+  <h2 id="more">Good to know</h2>
+  <div class="two">
+    <div class="card"><h3>Put it on your iPhone</h3>
+      <ol><li>Tap <b>Open the app</b> above, in Safari.</li><li>Tap Share, then <b>Add to Home Screen</b>.</li><li>Open it once from the new icon while online. After that it works with no connection.</li></ol></div>
+    <div class="card"><h3>Your data stays with you</h3>
+      <ul><li>Everything is calculated on your own device.</li><li>Nothing is uploaded: no account, no tracking, no server.</li><li>Projects are saved in your browser. Use <b>Save project file</b> in the menu for a backup.</li></ul></div>
+    <div class="card"><h3>What it is, and is not</h3>
+      <ul><li>It is a planning tool: a careful estimate, to be confirmed with a test recording.</li><li>The pictures show where light falls; they are illustrative, not a camera preview.</li><li>Daylight from windows is flagged but not calculated, so close the blinds when filming.</li></ul></div>
+    <div class="card"><h3>For those who want detail</h3>
+      <ul><li><b>Expert mode</b> in the menu shows every number, formula and assumption.</li><li>Manufacturer light files (IES and EULUMDAT) can be imported.</li><li>A printable report lists the plan, shopping list and camera settings.</li></ul></div>
+  </div>
+</section>
+
+<footer>
+  <p><a class="btn" href="LightIdea.html">Open the app</a></p>
+  <p style="margin-top:22px">Designed and developed by <b>Jerin</b></p>
+</footer>
+
+</div>
+</body>
+</html>

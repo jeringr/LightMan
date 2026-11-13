@@ -4,6 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
+<!-- Installable app (iPhone "Add to Home Screen", Android / desktop install). These files sit next to this page;
+     when the page is opened on its own from disk they are simply not found and the app works as before. -->
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="LightIdea">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <title>LightIdea — Lighting analysis &amp; planning</title>
 <!--
   LightIdea — offline lighting analysis & planning for video rooms.
@@ -24,217 +35,261 @@
 -->
 <!-- ===================== SECTION 0 — STYLES ===================== -->
 <style>
+/* =====================================================================
+   Visual system (inspired by Apple's Human Interface Guidelines)
+   • one accent colour; green / amber / red are used for status only
+   • neutral grouped background, white cards, hairline separators
+   • system font, large bold titles, quiet grey secondary text
+   • translucent bars, filled controls without outlines, switches
+   Class names are unchanged — only the look is defined here.
+   ===================================================================== */
 :root {
-  --bg: #f4f5f9; --panel: #ffffff; --panel2: #f3f5fa; --ink: #131826; --muted: #5d6679; --line: #e2e6ef;
-  --accent: #2f5bea; --accent-ink: #ffffff; --accent-soft: #e8eeff; --ok: #12805c; --warn: #a55a00; --bad: #cf3030; --na: #7a8493;
-  --ok-bg: #e0f5ec; --warn-bg: #fdf1d9; --bad-bg: #fde6e6; --na-bg: #eceff5;
-  --existing: #e08a00; --rec: #0f9a70; --cam: #7447d1; --person: #2f5bea; --window: #2f9bd6;
-  --room: #ffffff; --grid: #e8ecf3; --shadow: 0 1px 2px rgba(18,24,40,.05), 0 8px 24px rgba(18,24,40,.07);
-  --radius: 16px; --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --bg: #f2f2f7; --panel: #ffffff; --panel2: #f5f5f8; --ink: #1c1c1e; --muted: #6a6a70; --line: #e3e3e8;
+  --accent: #0071e3; --accent-ink: #ffffff; --accent-soft: #e6f0fd;
+  --ok: #1d7f38; --warn: #a85400; --bad: #d1242f; --na: #7c7c82;
+  --ok-bg: #e4f6e9; --warn-bg: #fff3df; --bad-bg: #ffe8e7; --na-bg: #ececf0;
+  --fill: rgba(118,118,128,.12); --fill2: rgba(118,118,128,.2); --switch-on: #34c759;
+  --existing: #e08a00; --rec: #1f9d6b; --cam: #7d4cd6; --person: #0071e3; --window: #32ade6;
+  --room: #ffffff; --grid: #ececf1;
+  --shadow: 0 1px 2px rgba(0,0,0,.04), 0 6px 20px rgba(0,0,0,.06); --shadow-pop: 0 2px 6px rgba(0,0,0,.08), 0 18px 48px rgba(0,0,0,.18);
+  --radius: 18px; --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 html[data-theme="dark"] {
-  --bg: #0c0f16; --panel: #151a25; --panel2: #1b2130; --ink: #e9edf5; --muted: #9aa5b8; --line: #283043;
-  --accent: #7c9cff; --accent-ink: #0a1022; --accent-soft: #1d2745; --ok: #52c891; --warn: #f1b54e; --bad: #ff8078; --na: #8e99a8;
-  --ok-bg: #133325; --warn-bg: #3a2c10; --bad-bg: #40191a; --na-bg: #232a38;
-  --existing: #f0a92e; --rec: #3fd0a0; --cam: #b79cff; --person: #7c9cff; --window: #5cc0f5;
-  --room: #121722; --grid: #222a39; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  --bg: #000000; --panel: #1c1c1e; --panel2: #2a2a2d; --ink: #f5f5f7; --muted: #a1a1a8; --line: #38383b;
+  --accent: #0a84ff; --accent-ink: #ffffff; --accent-soft: #10315a;
+  --ok: #30d158; --warn: #ff9f0a; --bad: #ff5a50; --na: #98989f;
+  --ok-bg: #12301a; --warn-bg: #3a2a0a; --bad-bg: #3c1614; --na-bg: #2c2c2e;
+  --fill: rgba(118,118,128,.24); --fill2: rgba(118,118,128,.36); --switch-on: #30d158;
+  --existing: #ffb340; --rec: #3fd0a0; --cam: #bf9cff; --person: #4da3ff; --window: #64d2ff;
+  --room: #1c1c1e; --grid: #2e2e31;
+  --shadow: 0 0 0 1px rgba(255,255,255,.06); --shadow-pop: 0 0 0 1px rgba(255,255,255,.1), 0 18px 48px rgba(0,0,0,.6);
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font); min-height: 100vh; }
-h1, h2, h3, h4 { margin: 0; line-height: 1.25; }
-h2 { font-size: 17px; } h3 { font-size: 15px; } h4 { font-size: 13px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.47 var(--font); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4 { margin: 0; line-height: 1.2; letter-spacing: -.015em; }
+h2 { font-size: 19px; font-weight: 700; } h3 { font-size: 16px; font-weight: 600; }
+h4 { font-size: 12.5px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .03em; }
 p { margin: 0 0 8px; } small, .muted { color: var(--muted); }
 button, input, select, textarea { font: inherit; color: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
 a { color: var(--accent); }
 
-/* ---- top bar ---- */
-.top { position: sticky; top: 0; z-index: 30; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 16px; padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); background: color-mix(in srgb, var(--panel) 88%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
-.brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 17px; letter-spacing: -.01em; white-space: nowrap; }
-.brand .logo { width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg, #ffb020, #ff7a1a); color: #fff; display: grid; place-items: center; }
-.brand svg { width: 18px; height: 18px; }
-.top .name { flex: 1 1 140px; min-width: 90px; max-width: 300px; border-color: transparent; background: transparent; font-weight: 600; }
-.top .name:hover, .top .name:focus { border-color: var(--line); background: var(--panel); }
+/* ---- top bar: translucent, hairline underneath ---- */
+.top { position: sticky; top: 0; z-index: 30; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 20px; padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); background: color-mix(in srgb, var(--bg) 72%, transparent); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; letter-spacing: -.02em; white-space: nowrap; }
+.brand .logo { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; box-shadow: 0 1px 3px rgba(0,0,0,.2), 0 0 0 .5px rgba(0,0,0,.08); }
+.top .name { flex: 1 1 140px; min-width: 90px; max-width: 300px; background: transparent; font-weight: 500; color: var(--muted); }
+.top .name:hover, .top .name:focus { background: var(--fill); color: var(--ink); }
 .top .spacer { flex: 1 1 0; }
-.tools { display: flex; gap: 6px; align-items: center; }
+.tools { display: flex; gap: 8px; align-items: center; }
 
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 11px; background: var(--panel); font-weight: 600; cursor: pointer; white-space: nowrap; user-select: none; transition: border-color .12s, color .12s, filter .12s; }
-.btn:hover { border-color: var(--accent); color: var(--accent); }
-.btn:disabled { opacity: .4; cursor: default; border-color: var(--line); color: inherit; }
-.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 35%, transparent); }
-.btn.primary:hover { color: var(--accent-ink); filter: brightness(1.08); }
-.btn.small { min-height: 36px; padding: 5px 12px; font-size: 14px; }
+/* ---- buttons: filled, no outline; one blue primary per screen ---- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 8px 16px; border: 0; border-radius: 11px; background: var(--fill); font-weight: 500; cursor: pointer; white-space: nowrap; user-select: none; -webkit-user-select: none; transition: background-color .15s, opacity .15s, transform .1s; }
+.btn:hover { background: var(--fill2); }
+.btn:active { transform: scale(.97); opacity: .85; }
+.btn:disabled { opacity: .35; cursor: default; transform: none; background: var(--fill); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.btn.primary:hover { background: color-mix(in srgb, var(--accent) 88%, #000); }
+.btn.small { min-height: 36px; padding: 6px 14px; font-size: 14px; }
 .btn.danger { color: var(--bad); }
-.btn.on { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
-.seg { display: inline-flex; padding: 3px; gap: 2px; border-radius: 11px; background: var(--na-bg); }
-.seg button { border: 0; background: none; min-height: 30px; padding: 3px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--muted); }
-.seg button.on { background: var(--panel); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.16); }
-input[type="text"], input[type="number"], select, textarea { width: 100%; min-height: 40px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
-input:focus-visible, select:focus-visible, button:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent); }
-input[type="range"] { width: 100%; accent-color: var(--accent); min-height: 32px; }
+.btn.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+/* segmented control */
+.seg { display: inline-flex; padding: 2px; gap: 0; border-radius: 10px; background: var(--fill); }
+.seg button { border: 0; background: none; min-height: 32px; padding: 3px 14px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--ink); transition: background-color .15s; }
+.seg button.on { background: var(--panel); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 0 .5px rgba(0,0,0,.04); }
+html[data-theme="dark"] .seg button.on { background: #636366; box-shadow: none; }
+/* text fields: filled, borderless, soft focus ring */
+input[type="text"], input[type="number"], select, textarea { width: 100%; min-height: 40px; padding: 6px 12px; border: 0; border-radius: 10px; background: var(--fill); transition: box-shadow .15s, background-color .15s; }
+input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus { outline: none; background: var(--panel); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent), inset 0 0 0 1px var(--accent); }
+button:focus-visible, summary:focus-visible, input[type="checkbox"]:focus-visible, input[type="range"]:focus-visible, .item:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent); outline-offset: 2px; }
+/* switch (every checkbox) */
+input[type="checkbox"] { -webkit-appearance: none; appearance: none; flex: 0 0 auto; width: 44px; height: 26px; margin: 0; border-radius: 13px; background: var(--fill2); position: relative; cursor: pointer; transition: background-color .2s; vertical-align: middle; }
+input[type="checkbox"]::after { content: ''; position: absolute; left: 2px; top: 2px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25), 0 0 0 .5px rgba(0,0,0,.06); transition: transform .2s cubic-bezier(.3,.7,.3,1); }
+input[type="checkbox"]:checked { background: var(--switch-on); }
+input[type="checkbox"]:checked::after { transform: translateX(18px); }
+/* slider */
+input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 30px; background: transparent; cursor: pointer; }
+input[type="range"]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: var(--fill2); }
+input[type="range"]::-moz-range-track { height: 4px; border-radius: 2px; background: var(--fill2); }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; margin-top: -11px; border-radius: 50%; background: #fff; border: 0; box-shadow: 0 1px 4px rgba(0,0,0,.3), 0 0 0 .5px rgba(0,0,0,.08); }
+input[type="range"]::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 0; box-shadow: 0 1px 4px rgba(0,0,0,.3), 0 0 0 .5px rgba(0,0,0,.08); }
 
-/* menu (☰): file actions, units, theme, expert mode */
+/* menu (☰): a popover with plain rows */
 .menu { position: relative; }
 .menu summary { list-style: none; }
 .menu summary::-webkit-details-marker { display: none; }
-.menupop { position: absolute; right: 0; top: calc(100% + 8px); z-index: 40; width: 236px; padding: 8px; display: flex; flex-direction: column; gap: 2px; }
-.menupop .btn { justify-content: flex-start; width: 100%; border-color: transparent; font-weight: 500; }
-.menupop .mrow { display: flex; justify-content: space-between; align-items: center; padding: 4px 12px; font-size: 14px; }
-.menupop hr { width: 100%; border: 0; border-top: 1px solid var(--line); margin: 4px 0; }
+.menupop { position: absolute; right: 0; top: calc(100% + 8px); z-index: 40; width: 250px; padding: 6px; display: flex; flex-direction: column; gap: 0; border: 0; border-radius: 14px; background: color-mix(in srgb, var(--panel) 86%, transparent); -webkit-backdrop-filter: saturate(180%) blur(24px); backdrop-filter: saturate(180%) blur(24px); box-shadow: var(--shadow-pop); }
+.menupop .btn { justify-content: flex-start; width: 100%; background: none; font-weight: 400; border-radius: 9px; min-height: 40px; }
+.menupop .btn:hover { background: var(--fill); }
+.menupop .mrow { display: flex; justify-content: space-between; align-items: center; padding: 6px 14px; font-size: 14px; }
+.menupop hr { width: calc(100% - 28px); border: 0; border-top: 1px solid var(--line); margin: 6px 14px; }
 
 /* ---- status bar: plain words in Simple mode, numeric chips in Expert mode ---- */
-.score { display: flex; gap: 8px; padding: 10px 16px; overflow-x: auto; align-items: stretch; scrollbar-width: none; }
+.score { display: flex; gap: 10px; padding: 14px 20px 10px; overflow-x: auto; align-items: stretch; scrollbar-width: none; }
 .score::-webkit-scrollbar { display: none; }
-.hero { flex: 0 0 auto; display: flex; align-items: center; gap: 12px; padding: 8px 18px 8px 10px; border: 0; border-radius: 14px; cursor: pointer; text-align: left; background: var(--na-bg); color: var(--na); }
-.hero.pass { background: var(--ok-bg); color: var(--ok); } .hero.warn { background: var(--warn-bg); color: var(--warn); } .hero.fail { background: var(--bad-bg); color: var(--bad); }
-.hero .hi { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%; background: currentColor; display: grid; place-items: center; }
-.hero .hi span { color: var(--panel); font-weight: 800; font-size: 17px; }
-.hero b { display: block; font-size: 16px; color: var(--ink); white-space: nowrap; }
+.hero { flex: 0 0 auto; display: flex; align-items: center; gap: 12px; padding: 10px 20px 10px 12px; border: 0; border-radius: 16px; cursor: pointer; text-align: left; background: var(--panel); color: var(--na); box-shadow: var(--shadow); transition: transform .1s; }
+.hero:active { transform: scale(.98); }
+.hero.pass { color: var(--ok); } .hero.warn { color: var(--warn); } .hero.fail { color: var(--bad); }
+.hero .hi { flex: 0 0 auto; width: 36px; height: 36px; border-radius: 50%; background: currentColor; display: grid; place-items: center; }
+.hero .hi span { color: #fff; font-weight: 700; font-size: 18px; }
+.hero b { display: block; font-size: 16px; font-weight: 600; letter-spacing: -.01em; color: var(--ink); white-space: nowrap; }
 .hero small { white-space: nowrap; }
-.pill { flex: 0 0 auto; display: inline-flex; flex-direction: column; justify-content: center; padding: 6px 14px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); font-size: 12px; color: var(--muted); white-space: nowrap; }
-.pill b { font-size: 14.5px; }
+.pill { flex: 0 0 auto; display: inline-flex; flex-direction: column; justify-content: center; gap: 1px; padding: 8px 16px; border-radius: 16px; background: var(--panel); box-shadow: var(--shadow); font-size: 12px; color: var(--muted); white-space: nowrap; }
+.pill b { font-size: 15px; font-weight: 600; }
 .pill.pass b { color: var(--ok); } .pill.warn b { color: var(--warn); } .pill.fail b { color: var(--bad); } .pill.na b { color: var(--na); }
-.chip { flex: 0 0 auto; display: flex; flex-direction: column; gap: 1px; padding: 6px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); min-width: 112px; cursor: pointer; text-align: left; }
-.chip b { font-size: 15px; font-variant-numeric: tabular-nums; }
+.chip { flex: 0 0 auto; display: flex; flex-direction: column; gap: 1px; padding: 8px 14px; border-radius: 14px; border: 0; background: var(--panel); box-shadow: var(--shadow); min-width: 116px; cursor: pointer; text-align: left; }
+.chip b { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.chip b::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; background: var(--na); }
+.chip.pass b::before { background: var(--ok); } .chip.warn b::before { background: var(--warn); } .chip.fail b::before { background: var(--bad); }
 .chip span { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
-.chip.pass { border-left: 4px solid var(--ok); } .chip.warn { border-left: 4px solid var(--warn); } .chip.fail { border-left: 4px solid var(--bad); } .chip.na { border-left: 4px solid var(--na); }
 .chip .was { font-size: 11px; color: var(--muted); font-weight: 400; }
 body.simple .adv { display: none !important; }            /* expert-only controls */
 body:not(.simple) .simp { display: none !important; }     /* simple-only wording */
 
 /* ---- layout ---- */
-.main { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(380px, 1fr); gap: 16px; padding: 4px 16px 16px; align-items: start; }
+.main { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(380px, 1fr); gap: 20px; padding: 6px 20px 24px; align-items: start; }
 body.wide .main { grid-template-columns: minmax(0, 1fr); }
 body.wide #planPane { display: none; }
-.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
-#planPane { position: sticky; top: 70px; padding: 10px; }
-.planbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 6px; }
+.card { background: var(--panel); border: 0; border-radius: var(--radius); box-shadow: var(--shadow); }
+#planPane { position: sticky; top: 74px; padding: 12px; }
+.planbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
 .planbar .spacer { flex: 1; }
 #plan3d { display: block; width: 100%; touch-action: none; user-select: none; -webkit-user-select: none; border-radius: 12px; cursor: grab; }
 #plan { display: block; width: 100%; height: 420px; touch-action: none; user-select: none; -webkit-user-select: none; border-radius: 12px; background: var(--panel2); }
-.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; margin-top: 6px; font-size: 12px; color: var(--muted); }
-.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: -2px; margin-right: 4px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: center; margin-top: 10px; padding: 0 4px; font-size: 12px; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; vertical-align: -1px; margin-right: 5px; }
 .heatbar { display: flex; align-items: center; gap: 6px; }
-.heatbar .bar { width: 120px; height: 10px; border-radius: 5px; border: 1px solid var(--line); }
+.heatbar .bar { width: 120px; height: 8px; border-radius: 4px; }
 
-.tabs { display: flex; gap: 4px; overflow-x: auto; padding: 8px; border-bottom: 1px solid var(--line); scrollbar-width: none; }
+/* section tabs */
+.tabs { display: flex; gap: 2px; overflow-x: auto; padding: 10px 12px; border-bottom: 1px solid var(--line); scrollbar-width: none; }
 .tabs::-webkit-scrollbar { display: none; }
-.tabs button { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; border: 0; background: none; padding: 8px 14px; min-height: 38px; cursor: pointer; border-radius: 999px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+.tabs button { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; border: 0; background: none; padding: 7px 14px; min-height: 36px; cursor: pointer; border-radius: 9px; color: var(--muted); font-size: 14px; font-weight: 500; white-space: nowrap; transition: background-color .15s, color .15s; }
 .tabs button svg { width: 18px; height: 18px; }
-.tabs button:hover { background: var(--na-bg); }
-.tabs button.on { background: var(--accent-soft); color: var(--accent); }
-#panel, #camPanel { padding: 16px; }
-#panel section > h3 { font-size: 17px; }
+.tabs button:hover { background: var(--fill); }
+.tabs button.on { background: var(--fill); color: var(--accent); font-weight: 600; }
+#panel, #camPanel { padding: 20px; }
+#panel section > h3 { font-size: 22px; font-weight: 700; letter-spacing: -.02em; }      /* large title */
+#camPanel section > h3 { font-size: 22px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 6px; }
 #camPanel[hidden], #panel[hidden] { display: none; }
-#panel > section + section, .block + .block { margin-top: 16px; }
-.block > h3, #panel section > h3 { margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.hint { font-size: 12.5px; color: var(--muted); margin: 0 0 8px; }
-.note { padding: 8px 10px; border-radius: 8px; background: var(--na-bg); font-size: 13px; margin: 8px 0; }
+#panel > section + section, .block + .block { margin-top: 22px; }
+.block > h3, #panel section > h3 { margin-bottom: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+#panel h4 { margin: 14px 0 6px; }
+.hint { font-size: 13px; color: var(--muted); margin: 0 0 10px; }
+.note { padding: 12px 14px; border-radius: 12px; background: var(--na-bg); font-size: 14px; margin: 8px 0; }
 .note.warn { background: var(--warn-bg); } .note.bad { background: var(--bad-bg); } .note.ok { background: var(--ok-bg); }
 
 /* ---- forms ---- */
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 8px 10px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 12px 12px; }
 .grid.g3 { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); }
-.f { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.f > span { font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; gap: 6px; align-items: baseline; }
-.f > span small { font-size: 11px; }
-.f.check { flex-direction: row; align-items: center; gap: 8px; min-height: 36px; }
-.f.check > span { font-size: 13.5px; color: var(--ink); }
+.f { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.f > span { font-size: 12.5px; color: var(--muted); display: flex; justify-content: space-between; gap: 6px; align-items: baseline; }
+.f > span small { font-size: 11.5px; }
+.f.check { flex-direction: row; align-items: center; gap: 10px; min-height: 40px; cursor: pointer; }
+.f.check > span { font-size: 14.5px; color: var(--ink); }
 .f.wide { grid-column: 1 / -1; }
 .withprov { display: flex; gap: 4px; }
 .withprov select.prov { flex: 0 0 34px; width: 34px; padding: 0 2px; font-size: 11px; text-align: center; }
-.row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .row .spacer { flex: 1; }
 
-/* ---- provenance badges ---- */
-.pv { display: inline-block; padding: 0 6px; border-radius: 9px; font-size: 10.5px; font-weight: 600; line-height: 17px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; vertical-align: 1px; }
-.pv.User { color: var(--accent); border-color: var(--accent); }
-.pv.Measured { color: var(--ok); border-color: var(--ok); }
-.pv.Manufacturer { color: var(--cam); border-color: var(--cam); }
+/* ---- provenance badges (Expert mode) ---- */
+.pv { display: inline-block; padding: 0 7px; border-radius: 9px; font-size: 10.5px; font-weight: 600; line-height: 18px; background: var(--fill); color: var(--muted); white-space: nowrap; vertical-align: 1px; }
+.pv.User { color: var(--accent); }
+.pv.Measured { color: var(--ok); }
+.pv.Manufacturer { color: var(--cam); }
 .pv.Calculated { color: var(--ink); }
-.pv.Assumed { color: var(--warn); border-color: var(--warn); }
-.pv.Insufficient { color: var(--bad); border-color: var(--bad); }
+.pv.Assumed { color: var(--warn); }
+.pv.Insufficient { color: var(--bad); }
+select.pvsel { width: auto; min-height: 20px; height: 20px; padding: 0 4px; font-size: 10.5px; font-weight: 600; border-radius: 10px; cursor: pointer; }
 
-select.pvsel { width: auto; min-height: 19px; height: 19px; padding: 0 2px; font-size: 10.5px; font-weight: 600; border-radius: 9px; background: var(--panel); cursor: pointer; }
 /* ---- tables ---- */
 .tw { overflow-x: auto; }
-table { border-collapse: collapse; width: 100%; font-size: 13px; }
-th, td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
-th { font-size: 11.5px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+tbody tr:last-child td { border-bottom: 0; }
+th { font-size: 11.5px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-td input[type="number"], td input[type="text"], td select { min-height: 32px; padding: 3px 6px; min-width: 62px; }
-.st { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+td input[type="number"], td input[type="text"], td select { min-height: 34px; padding: 3px 8px; min-width: 62px; }
+.st { display: inline-block; padding: 1px 9px; border-radius: 10px; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
 .st.pass { background: var(--ok-bg); color: var(--ok); } .st.warn { background: var(--warn-bg); color: var(--warn); }
 .st.fail { background: var(--bad-bg); color: var(--bad); } .st.na { background: var(--na-bg); color: var(--na); }
 details.src { font-size: 12px; color: var(--muted); } details.src summary { cursor: pointer; }
+
+/* ---- lists: rows on a quiet grey, selection in the accent tint ---- */
 .list { display: flex; flex-direction: column; gap: 6px; }
-.item { display: flex; gap: 8px; align-items: center; padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); cursor: pointer; }
-.item.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-.item .t { flex: 1; min-width: 0; } .item .t b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item { display: flex; gap: 12px; align-items: center; padding: 12px 14px; border: 0; border-radius: 12px; background: var(--panel2); cursor: pointer; transition: background-color .15s; }
+.item:hover { background: var(--fill); }
+.item.sel { background: var(--accent-soft); box-shadow: inset 0 0 0 1.5px var(--accent); }
+.item .t { flex: 1; min-width: 0; } .item .t b { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .item .t small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dot { flex: 0 0 auto; width: 12px; height: 12px; border-radius: 50%; background: var(--existing); }
-.dot.rec { background: none; border: 2px dashed var(--rec); } .dot.off { background: var(--na); }
-.tag { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 9px; }
-.tag.ex { background: color-mix(in srgb, var(--existing) 20%, transparent); color: var(--existing); }
-.tag.rc { background: color-mix(in srgb, var(--rec) 20%, transparent); color: var(--rec); }
-.act { border: 1px solid var(--line); border-left: 4px solid var(--rec); border-radius: 8px; padding: 8px 10px; cursor: pointer; }
-.act.reaim, .act.dim { border-left-color: var(--existing); }
-.act b { display: block; margin-bottom: 2px; } .act p { margin: 0; font-size: 12.5px; color: var(--muted); }
-.kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 13px; }
+.item.wrap .t b { white-space: normal; font-weight: 500; }
+.radio { flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--fill2); background: var(--panel); }
+.item.sel .radio { border: 7px solid var(--accent); }
+.dot { flex: 0 0 auto; width: 10px; height: 10px; border-radius: 50%; background: var(--existing); }
+.dot.rec { background: none; border: 2px dashed var(--rec); width: 12px; height: 12px; } .dot.off { background: var(--na); }
+.tag { font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 10px; white-space: nowrap; }
+.tag.ex { background: var(--fill); color: var(--muted); }
+.tag.rc { background: color-mix(in srgb, var(--rec) 16%, transparent); color: var(--rec); }
+/* to-do cards: the dot shows "buy" (green) or "adjust what you have" (amber) */
+.act { border: 0; border-radius: 14px; padding: 14px 16px; background: var(--panel2); cursor: pointer; transition: background-color .15s; }
+.act b { display: block; margin-bottom: 4px; font-weight: 600; }
+.act b::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: 2px; background: var(--rec); }
+.act.reaim b::before, .act.dim b::before { background: var(--existing); }
+.act p { margin: 0 0 3px; font-size: 13.5px; color: var(--muted); }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 13.5px; }
 .kv dt { color: var(--muted); } .kv dd { margin: 0; font-variant-numeric: tabular-nums; }
-.pcard { border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; }
+.pcard { border-radius: 14px; padding: 14px 16px; background: var(--panel2); }
 .pcard + .pcard { margin-top: 8px; }
-.formula { font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; font-size: 12.5px; background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin: 6px 0 10px; white-space: pre-wrap; overflow-x: auto; }
+.formula { font-family: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, Menlo, monospace; font-size: 12.5px; background: var(--panel2); border-radius: 10px; padding: 10px 12px; margin: 6px 0 10px; white-space: pre-wrap; overflow-x: auto; }
 
 /* ---- guide: one step open at a time ---- */
-.prog { display: flex; gap: 6px; margin: 4px 0 12px; }
-.prog i { flex: 1; height: 6px; border-radius: 3px; background: var(--line); }
+.prog { display: flex; gap: 5px; margin: 6px 0 16px; }
+.prog i { flex: 1; height: 4px; border-radius: 2px; background: var(--fill2); }
 .prog i.done { background: var(--ok); } .prog i.cur { background: var(--accent); }
-.step { border: 1px solid var(--line); border-radius: 14px; margin-top: 8px; background: var(--panel); overflow: hidden; }
-.step.open { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-.step .sh { display: flex; width: 100%; gap: 10px; align-items: center; padding: 12px 14px; border: 0; background: none; cursor: pointer; text-align: left; }
-.step .sh .st-t { flex: 1; font-weight: 700; font-size: 15.5px; }
+.step { border-radius: 14px; margin-top: 8px; background: var(--panel2); overflow: hidden; transition: background-color .2s, box-shadow .2s; }
+.step.open { background: var(--panel); box-shadow: 0 0 0 1px var(--line), 0 8px 24px rgba(0,0,0,.08); }
+.step .sh { display: flex; width: 100%; gap: 12px; align-items: center; min-height: 52px; padding: 10px 16px; border: 0; background: none; cursor: pointer; text-align: left; }
+.step .sh .st-t { flex: 1; font-weight: 600; font-size: 16px; letter-spacing: -.01em; }
+.step.open .sh .st-t { font-size: 18px; font-weight: 700; }
 .step .sh small { max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.step .sb { padding: 0 14px 14px; }
+.step:not(.open) .sh::after { content: ''; flex: 0 0 auto; width: 7px; height: 7px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg); opacity: .5; }
+.step .sb { padding: 2px 16px 16px; }
 .step p, .step li { font-size: 14.5px; }
-.sn { flex: 0 0 auto; width: 28px; height: 28px; border-radius: 50%; background: var(--na-bg); color: var(--muted); font-weight: 700; font-size: 13.5px; display: inline-flex; align-items: center; justify-content: center; }
+.sn { flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%; background: var(--fill2); color: var(--muted); font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; justify-content: center; }
 .step.open .sn { background: var(--accent); color: var(--accent-ink); }
 .step.done .sn { background: var(--ok); color: #fff; }
-.stepnav { margin-top: 14px; }
+html[data-theme="dark"] .step.done .sn { color: #000; }
+.stepnav { margin-top: 16px; }
 .vlist { list-style: none; margin: 4px 0 12px; padding: 0; }
-.vlist li { position: relative; padding: 3px 0 3px 20px; }
-.vlist li::before { content: ''; position: absolute; left: 2px; top: 10px; width: 10px; height: 10px; border-radius: 50%; background: var(--warn); }
+.vlist li { position: relative; padding: 4px 0 4px 20px; }
+.vlist li::before { content: ''; position: absolute; left: 3px; top: 12px; width: 8px; height: 8px; border-radius: 50%; background: var(--warn); }
 .vlist li.bad::before { background: var(--bad); }
 ul.tight, ol.tight { margin: 4px 0 10px; padding-left: 20px; }
-details.more { margin-top: 12px; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
-details.more summary { cursor: pointer; font-weight: 600; }
-details.more[open] summary { margin-bottom: 8px; }
-.item { padding: 10px 12px; border-radius: 12px; }
-.item.wrap .t b { white-space: normal; }
-.radio { flex: 0 0 auto; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--line); }
-.item.sel .radio { border: 6px solid var(--accent); }
-.act { border-radius: 12px; padding: 10px 12px; }
-.act p { font-size: 13.5px; }
-.note { border-radius: 12px; padding: 10px 12px; }
-.who { display: inline-flex; align-items: center; gap: 2px; padding: 3px 4px 3px 12px; border-radius: 999px; background: var(--accent-soft); font-size: 13.5px; font-weight: 600; }
-.who button { border: 0; background: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 17px; line-height: 1; color: var(--muted); }
+details.more { margin-top: 10px; border-radius: 12px; padding: 0 16px; background: var(--panel2); }
+details.more summary { cursor: pointer; font-weight: 500; padding: 14px 0; list-style-position: outside; }
+details.more[open] { padding-bottom: 14px; }
+.who { display: inline-flex; align-items: center; gap: 2px; padding: 3px 4px 3px 14px; border-radius: 999px; background: var(--fill); font-size: 14px; font-weight: 500; }
+.who button { border: 0; background: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 17px; line-height: 1; color: var(--muted); }
+.who button:hover { background: var(--fill2); }
+
 /* ---- camera ---- */
-.stage { position: relative; background: #000; border-radius: 8px; overflow: hidden; max-width: 720px; }
+.stage { position: relative; background: #000; border-radius: 14px; overflow: hidden; max-width: 720px; }
 .stage canvas { display: block; width: 100%; height: auto; }
 .stage canvas.ov { position: absolute; inset: 0; touch-action: none; cursor: crosshair; }
-.stage .empty { color: #cfd6e0; padding: 60px 16px; text-align: center; }
+.stage .empty { color: #c7c7cc; padding: 64px 16px; text-align: center; }
 .thumbs { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0; }
-.thumbs img { height: 56px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; }
+.thumbs img { height: 56px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; }
 .thumbs img.on { border-color: var(--accent); }
-.camgrid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(260px, 1fr); gap: 14px; align-items: start; }
-#hist { width: 100%; height: 110px; display: block; border: 1px solid var(--line); border-radius: 8px; background: var(--panel2); }
+.camgrid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(260px, 1fr); gap: 18px; align-items: start; }
+#hist { width: 100%; height: 110px; display: block; border-radius: 10px; background: var(--panel2); }
 .filebtn { position: relative; overflow: hidden; }
 .filebtn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
 
-#toast { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 60; max-width: min(92vw, 560px); padding: 9px 14px; border-radius: 10px; background: var(--ink); color: var(--bg); font-size: 13.5px; box-shadow: var(--shadow); opacity: 0; pointer-events: none; transition: opacity .2s; }
-#toast.show { opacity: 1; }
+#toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%) translateY(8px); z-index: 60; max-width: min(92vw, 560px); padding: 12px 18px; border-radius: 14px; background: rgba(40,40,42,.92); color: #fff; font-size: 14px; -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); box-shadow: var(--shadow-pop); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; }
+#toast.show { opacity: 1; transform: translateX(-50%); }
 
 /* ---- plan SVG ---- */
 .plan text { font-family: var(--font); fill: var(--ink); pointer-events: none; }
@@ -244,34 +299,152 @@ details.more[open] summary { margin-bottom: 8px; }
 
 /* ---- report ---- */
 .report { max-width: 980px; margin: 0 auto; }
-.report h1 { font-size: 22px; margin-bottom: 2px; }
-.report h2 { margin: 20px 0 8px; padding-bottom: 4px; border-bottom: 2px solid var(--line); }
-.report .planshot svg { width: 100%; height: auto; max-height: 520px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel2); }
-.report ul { margin: 4px 0 8px; padding-left: 20px; } .report li { margin: 2px 0; }
-.report table { font-size: 12px; }
+.report h1 { font-size: 30px; font-weight: 700; letter-spacing: -.025em; margin-bottom: 2px; }
+.report h2 { margin: 26px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.report .planshot svg { width: 100%; height: auto; max-height: 520px; border-radius: 14px; background: var(--panel2); }
+.report ul { margin: 4px 0 8px; padding-left: 20px; } .report li { margin: 3px 0; }
+.report table { font-size: 12.5px; }
+.report .act { cursor: default; }
 
-@media (max-width: 900px) {
-  body { padding-bottom: calc(70px + env(safe-area-inset-bottom)); }
-  .main { grid-template-columns: minmax(0, 1fr); padding: 0 10px 10px; gap: 10px; }
-  #planPane { position: static; }
-  #plan { height: 300px; }
-  .top { position: static; padding: 8px 12px; }
-  .score { padding: 8px 10px; }
-  .camgrid { grid-template-columns: minmax(0, 1fr); }
-  .top .name { order: 5; flex-basis: 100%; max-width: none; }
+/* ---- stepper: − value + (number fields in Simple mode) ---- */
+.stepper { display: flex; align-items: stretch; min-height: 40px; border-radius: 10px; background: var(--fill); overflow: hidden; }
+.stepper input[type="number"] { flex: 1 1 auto; width: auto; min-width: 0; padding: 6px 2px; border-radius: 0; background: transparent; text-align: center; font-variant-numeric: tabular-nums; -moz-appearance: textfield; appearance: textfield; }
+.stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.stepper input[type="number"]:focus { background: var(--panel); box-shadow: inset 0 0 0 2px var(--accent); }
+.stepper button { flex: 0 0 40px; display: grid; place-items: center; border: 0; background: none; color: var(--accent); cursor: pointer; transition: background-color .12s; }
+.stepper button:hover { background: var(--fill); } .stepper button:active { background: var(--fill2); }
+.stepper button:first-child { border-right: 1px solid var(--line); } .stepper button:last-child { border-left: 1px solid var(--line); }
+.stepper button svg { width: 16px; height: 16px; }
+#quick .stepper { background: var(--panel); }
+.grid:has(.stepper) { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+/* icons inside buttons */
+.btn svg { width: 18px; height: 18px; flex: none; }
+.btn.small svg { width: 17px; height: 17px; }
+
+/* ---- guide: one step per screen ---- */
+.prog button { flex: 1; height: 16px; padding: 6px 0; border: 0; background: none; cursor: pointer; }
+.prog button::before { content: ''; display: block; height: 4px; border-radius: 2px; background: var(--fill2); transition: background-color .2s; }
+.prog button.done::before { background: var(--ok); } .prog button.cur::before { background: var(--accent); }
+.eyebrow { margin: 0 0 2px; font-size: 13px; font-weight: 600; color: var(--accent); }
+.eyebrow .ok { color: var(--ok); }
+#panel .stepview > h3 { font-size: 26px; font-weight: 700; letter-spacing: -.025em; margin-bottom: 12px; }
+.stepview p, .stepview li { font-size: 15px; }
+.stepview.enter { animation: stepIn .34s cubic-bezier(.2,.8,.2,1); }
+.stepview.enter.back { animation-name: stepBack; }
+@keyframes stepIn { from { opacity: 0; transform: translateX(22px); } to { opacity: 1; transform: none; } }
+@keyframes stepBack { from { opacity: 0; transform: translateX(-22px); } to { opacity: 1; transform: none; } }
+/* soft fade when the lighting has been recalculated */
+#plan.pulse, #plan3d.pulse { animation: recalc .35s ease-out; }
+@keyframes recalc { from { opacity: .55; } to { opacity: 1; } }
+#quick:not([hidden]) { animation: popIn .22s cubic-bezier(.2,.8,.2,1); }
+@keyframes popIn { from { opacity: 0; transform: translateY(-6px) scale(.98); } to { opacity: 1; transform: none; } }
+
+/* ---- status ring: fills as checks come inside their targets ---- */
+.ring { flex: 0 0 auto; position: relative; width: 42px; height: 42px; }
+.ring svg { width: 42px; height: 42px; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 4.5; stroke-linecap: round; }
+.ring .trk { stroke: var(--fill2); }
+.ring .arc { stroke: currentColor; transition: stroke-dashoffset .6s cubic-bezier(.3,.8,.3,1); }
+.ring b { position: absolute; inset: 0; display: grid !important; place-items: center; font-size: 15px !important; font-weight: 700 !important; color: currentColor !important; }
+
+/* ---- message with Undo ---- */
+#toast { display: flex; align-items: center; gap: 14px; }
+#toast.show { pointer-events: auto; }
+#toast button { flex: none; border: 0; background: none; padding: 4px 2px; font-weight: 600; color: #6cb2ff; cursor: pointer; }
+
+/* ---- welcome screen (first open, and New project) ---- */
+#welcome { position: fixed; inset: 0; z-index: 80; overflow-y: auto; background: var(--bg); display: flex; justify-content: center; padding: max(28px, env(safe-area-inset-top)) 20px 40px; animation: welcomeIn .35s ease-out; }
+@keyframes welcomeIn { from { opacity: 0; } to { opacity: 1; } }
+#welcome .w { width: 100%; max-width: 760px; margin: auto 0; }
+#welcome .logo { display: block; width: 76px; height: 76px; border-radius: 18px; object-fit: cover; box-shadow: 0 8px 24px rgba(0,0,0,.18), 0 0 0 .5px rgba(0,0,0,.08); }
+#welcome h1 { font-size: clamp(30px, 6vw, 44px); font-weight: 700; letter-spacing: -.03em; margin: 18px 0 6px; }
+#welcome .lead { font-size: 17px; color: var(--muted); margin-bottom: 22px; max-width: 34em; }
+#welcome .how { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 28px; }
+#welcome .how div { background: var(--panel); border-radius: 16px; padding: 16px 18px; box-shadow: var(--shadow); }
+#welcome .how b { display: block; font-size: 16px; margin: 8px 0 2px; }
+#welcome .how span { color: var(--muted); font-size: 14px; }
+#welcome .how .sn { background: var(--accent); color: var(--accent-ink); }
+#welcome h2 { margin-bottom: 10px; }
+#welcome .pick { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 8px; }
+#welcome .pick button { display: flex; align-items: center; gap: 10px; text-align: left; min-height: 56px; padding: 12px 16px; border: 0; border-radius: 14px; background: var(--panel); box-shadow: var(--shadow); cursor: pointer; font-weight: 500; transition: transform .1s, background-color .15s; }
+#welcome .pick button:hover { background: var(--accent-soft); }
+#welcome .pick button:active { transform: scale(.98); }
+#welcome .pick button::after { content: ''; margin-left: auto; flex: none; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg); opacity: .6; }
+#welcome .alt { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: var(--muted); font-size: 14px; }
+
+/* ---- layout by width ----
+   ≥ 1200 px : sidebar (sections + guide steps) · plan · inspector
+   901–1199 : sections as a row on top · plan · inspector
+   ≤ 900 px : plan as the hero, everything else in a bottom sheet that drags between three heights */
+#tabs { grid-column: 1 / -1; border-bottom: 0; padding: 0; }
+.substeps { display: none; }
+#grab { display: none; }
+#quick { margin: 16px 16px 0; padding: 14px 16px; border-radius: 14px; background: var(--accent-soft); }
+#quick .qh { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+#quick .qh b { font-size: 16px; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#quick .row { margin-top: 10px; }
+#quick input[type="text"], #quick input[type="number"] { background: var(--panel); }
+@media (min-width: 1200px) {
+  .main { grid-template-columns: 214px minmax(0, 1.25fr) minmax(360px, 430px); }
+  body.wide .main { grid-template-columns: 214px minmax(0, 1fr); }
+  #tabs { grid-column: 1; flex-direction: column; align-self: start; position: sticky; top: 74px; overflow: visible; gap: 2px; }
+  #tabs > button { justify-content: flex-start; width: 100%; min-height: 40px; font-size: 15px; }
+  .substeps { display: flex; flex-direction: column; gap: 1px; margin: 2px 0 10px 12px; padding-left: 10px; border-left: 1px solid var(--line); }
+  .tabs .substeps button { justify-content: flex-start; width: 100%; min-height: 34px; padding: 5px 10px; font-size: 13.5px; font-weight: 400; color: var(--ink); background: none; }
+  .tabs .substeps button:hover { background: var(--fill); }
+  .tabs .substeps button.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .substeps .sn { width: 20px; height: 20px; font-size: 11px; }
+  .substeps .done .sn { background: var(--ok); color: #fff; }
+  .substeps .on .sn { background: var(--accent); color: var(--accent-ink); }
+}
+@media (pointer: coarse) {                      /* fingers: 44-point targets */
+  .btn, .btn.small { min-height: 44px; }
+  .seg button { min-height: 38px; }
+  .menupop .btn { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+@media screen and (max-width: 900px) {
+  html, body { height: 100%; }
+  body { display: flex; flex-direction: column; overflow: hidden; }
+  .top { position: static; flex: none; flex-wrap: nowrap; padding: 8px 14px; }
+  .brand { font-size: 0; gap: 0; }                 /* logo only */
+  .top .name { flex: 1 1 60px; min-width: 0; max-width: none; }
   .hide-s { display: none; }
+  .score { flex: none; padding: 10px 12px 8px; }
+  /* the plan fills the screen; the page itself does not scroll */
+  .main { flex: 1 1 auto; min-height: 0; display: block; padding: 0 10px; overflow-y: auto; }
+  #planPane { position: static; padding: 0; background: none; box-shadow: none; }
+  .planbar { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -10px 8px; padding: 0 10px; }
+  .planbar::-webkit-scrollbar { display: none; }
+  .planbar > * { flex: none; }
+  .planbar .spacer { display: none; }
+  .legend { padding-bottom: 12px; }
+  .camgrid { grid-template-columns: minmax(0, 1fr); }
   input[type="text"], input[type="number"], select, textarea { font-size: 16px; }     /* stops iOS zooming into fields */
-  /* section tabs become a bottom navigation bar */
-  .tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 35; background: var(--panel); border-top: 1px solid var(--line); border-bottom: 0; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 16px rgba(0,0,0,.08); }
-  body.simple .tabs button { flex: 1 1 0; flex-direction: column; gap: 2px; padding: 6px 4px; border-radius: 12px; font-size: 12px; }
-  #toast { bottom: calc(84px + env(safe-area-inset-bottom)); }
+  /* bottom sheet: grabber on top, content scrolls inside; height is set by the app (peek / half / full) */
+  #sidePane { position: fixed; left: 0; right: 0; bottom: calc(56px + env(safe-area-inset-bottom)); height: 42vh; z-index: 34; display: flex; flex-direction: column; border-radius: 18px 18px 0 0; box-shadow: 0 -1px 0 var(--line), 0 -10px 30px rgba(0,0,0,.14); transition: height .3s cubic-bezier(.3,.8,.3,1); }
+  #sidePane.dragging { transition: none; }
+  #grab { display: flex; flex: none; justify-content: center; align-items: center; height: 26px; touch-action: none; cursor: grab; }
+  #grab::before { content: ''; width: 38px; height: 5px; border-radius: 3px; background: var(--fill2); }
+  #sheetBody { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+  #panel, #camPanel { padding: 4px 16px 20px; }
+  #quick { margin: 0 12px 12px; }
+  /* section tabs become a translucent tab bar; the active tab is shown by colour alone */
+  #tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 35; gap: 0; background: color-mix(in srgb, var(--panel) 80%, transparent); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border-top: 1px solid var(--line); padding: 4px 8px calc(4px + env(safe-area-inset-bottom)); }
+  body.simple .tabs > button { flex: 1 1 0; flex-direction: column; gap: 2px; min-height: 48px; padding: 4px; font-size: 10.5px; font-weight: 500; background: none; }
+  body.simple .tabs > button svg { width: 24px; height: 24px; }
+  body.simple .tabs > button.on { background: none; color: var(--accent); }
+  #toast { bottom: calc(80px + env(safe-area-inset-bottom)); }
+  .score, .main { padding-left: max(10px, env(safe-area-inset-left)); padding-right: max(10px, env(safe-area-inset-right)); }
+  #sidePane, #tabs { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
 }
 @media print {
   @page { margin: 14mm; }
-  html, html[data-theme="dark"] { --bg: #fff; --panel: #fff; --panel2: #fff; --ink: #000; --muted: #444; --line: #bbb; --room: #fff; --grid: #ddd; --ok-bg: #e2f4ea; --warn-bg: #fdf0d8; --bad-bg: #fbe3e3; --na-bg: #eee; --ok: #177a48; --warn: #a86400; --bad: #c22e2e; --existing: #b87400; --rec: #0d7a57; --cam: #5a3aa8; --person: #1c64d8; --accent: #1c64d8; }
+  html, html[data-theme="dark"] { --bg: #fff; --panel: #fff; --panel2: #fff; --ink: #000; --muted: #444; --line: #bbb; --room: #fff; --grid: #ddd; --ok-bg: #e2f4ea; --warn-bg: #fdf0d8; --bad-bg: #fbe3e3; --na-bg: #eee; --ok: #177a48; --warn: #a86400; --bad: #c22e2e; --existing: #b87400; --rec: #0d7a57; --cam: #5a3aa8; --person: #1c64d8; --accent: #1c64d8; --shadow: none; --fill: #f0f0f0; }
   body { background: #fff; font-size: 11px; }
-  .top, .score, #planPane, .tabs, .noprint, #toast { display: none !important; }
-  .main { display: block; padding: 0; } .card { border: 0; box-shadow: none; } #panel { padding: 0; }
+  .top, .score, #planPane, .tabs, .noprint, #toast, #grab, #quick, #welcome { display: none !important; }
+  .main { display: block; padding: 0; } .card { box-shadow: none; } #panel { padding: 0; }
+  .act, .pcard, .note { border: 1px solid var(--line); }
   .report h2 { break-after: avoid; } tr, .act, .pcard { break-inside: avoid; }
   .report .planshot { break-inside: avoid; }
 }
@@ -280,42 +453,43 @@ details.more[open] summary { margin-bottom: 8px; }
 <body>
 <header class="top">
   <div class="brand">
-    <span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></span>
+    <img class="logo" alt="" src="data:image/webp;base64,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">
     LightIdea
   </div>
   <input id="projName" class="name" type="text" aria-label="Project name" placeholder="Project name">
   <div class="spacer"></div>
   <div class="tools">
-    <button class="btn small" id="btnUndo" title="Undo (Ctrl+Z)" aria-label="Undo">↶</button>
-    <button class="btn small" id="btnRedo" title="Redo (Ctrl+Y)" aria-label="Redo">↷</button>
+    <button class="btn small" id="btnUndo" title="Undo (Ctrl+Z)" aria-label="Undo" data-ico="undo"></button>
+    <button class="btn small" id="btnRedo" title="Redo (Ctrl+Y)" aria-label="Redo" data-ico="redo"></button>
     <details class="menu" id="menu">
-      <summary class="btn small" aria-label="Menu">☰<span class="hide-s"> Menu</span></summary>
+      <summary class="btn small" aria-label="Menu" data-ico="menu"><span class="hide-s">Menu</span></summary>
       <div class="menupop card">
         <div class="mrow"><span>Units</span><div class="seg" role="group" aria-label="Units"><button id="unitM">m</button><button id="unitFt">ft</button></div></div>
-        <button class="btn small" id="btnTheme">Light / dark theme</button>
-        <button class="btn small" id="btnExpert" title="Show every setting, number and formula">Expert mode</button>
+        <button class="btn small" id="btnTheme" data-ico="moon">Light / dark theme</button>
+        <button class="btn small" id="btnExpert" title="Show every setting, number and formula" data-ico="sliders"><span id="expertLbl">Expert mode</span></button>
         <hr>
-        <button class="btn small" id="btnNew">New project</button>
-        <label class="btn small filebtn">Open project file…<input id="fileProject" type="file" accept=".json,application/json"></label>
-        <button class="btn small" id="btnSave">Save project file</button>
-        <button class="btn small" id="btnPrint">Print report / save PDF</button>
+        <button class="btn small" id="btnNew" data-ico="doc">New project</button>
+        <label class="btn small filebtn" data-ico="folder">Open project file…<input id="fileProject" type="file" accept=".json,application/json"></label>
+        <button class="btn small" id="btnSave" data-ico="download">Save project file</button>
+        <button class="btn small" id="btnPrint" data-ico="printer">Print report / save PDF</button>
       </div>
     </details>
   </div>
 </header>
 <div class="score" id="score" aria-label="Scorecard"></div>
 <main class="main">
+  <nav class="tabs" id="tabs" aria-label="Sections"></nav>
   <section id="planPane" class="card">
     <div class="planbar">
       <div class="seg" role="group" aria-label="State shown"><button id="modeBefore" title="Existing installation as it is">Before</button><button id="modeAfter" title="With recommendations applied">After</button></div>
       <div class="seg" role="group" aria-label="View"><button id="viewTop" title="Plan from above — drag things here">Top</button><button id="view3d" title="Angled 3-D view — drag to turn">3D</button><button id="viewCam" title="Roughly what the camera sees">Camera</button></div>
       <button class="btn small adv" id="tglHeat" title="Horizontal illuminance heat-map on the work plane">Heat-map</button>
       <button class="btn small adv" id="tglBeams" title="Beam footprints and aim lines">Beams</button>
-      <button class="btn small" id="tglReal" title="Switch between the diagram and a realistic picture of the room">Realistic</button>
+      <button class="btn small" id="tglReal" title="Switch between the diagram and a realistic picture of the room" data-ico="sparkle">Realistic</button>
       <div class="spacer"></div>
-      <button class="btn small" id="addPresenter">+ Person</button>
-      <button class="btn small adv" id="addCamera">+ Camera</button>
-      <button class="btn small" id="addFixture">+ Light</button>
+      <button class="btn small" id="addPresenter" data-ico="personplus">Person</button>
+      <button class="btn small adv" id="addCamera" data-ico="plus">Camera</button>
+      <button class="btn small" id="addFixture" data-ico="plus">Light</button>
       <button class="btn small adv" id="addPoint" title="Add a measurement point">+ Point</button>
     </div>
     <svg id="plan" class="plan" role="img" aria-label="Room plan"></svg>
@@ -323,12 +497,30 @@ details.more[open] summary { margin-bottom: 8px; }
     <div class="legend" id="legend"></div>
   </section>
   <section id="sidePane" class="card">
-    <nav class="tabs" id="tabs" aria-label="Sections"></nav>
-    <div id="panel"></div>
-    <div id="camPanel" hidden></div>
+    <div id="grab" role="button" tabindex="0" aria-label="Drag up or down to resize this panel"></div>
+    <div id="sheetBody">
+      <div id="quick" hidden></div>
+      <div id="panel"></div>
+      <div id="camPanel" hidden></div>
+    </div>
   </section>
 </main>
 <div id="toast" role="status" aria-live="polite"></div>
+<div id="welcome" hidden>
+  <div class="w">
+    <img class="logo" alt="" src="data:image/webp;base64,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">
+    <h1>Light your video like a studio</h1>
+    <p class="lead">No lighting knowledge needed. Tell the app about your room and it works out what to change, what to buy and where to put it.</p>
+    <div class="how">
+      <div><span class="sn">1</span><b>Describe your room</b><span>Its size, who is on camera, and the lights you already have.</span></div>
+      <div><span class="sn">2</span><b>See what is wrong</b><span>In plain words: too dark, too flat, mixed colours.</span></div>
+      <div><span class="sn">3</span><b>Follow the plan</b><span>A numbered list, then check the result with your camera.</span></div>
+    </div>
+    <h2>What are you filming?</h2>
+    <div class="pick" id="welcomePick"></div>
+    <div class="alt"><span>Just looking?</span><button class="btn small" id="welcomeSample">Explore a sample meeting room</button><button class="btn small" id="welcomeClose" hidden>Cancel</button></div>
+  </div>
+</div>
 <!-- =====================================================================
      SECTION 1 — ENGINE  (pure functions, no DOM, no globals except Engine)
      Coordinates: x → along room length (plan: right), y → along room width
@@ -1292,7 +1484,7 @@ const Engine = (() => {
           if (m.isNew) {
             fx.name = 'New ' + role + ' light ' + fx.id;
             added.push(fx);
-            actions.push({ kind: 'add', fixtureId: fx.id, role, title: 'Add ' + role + ' light for ' + sb.name + ' — ' + TYPES[fx.type].label + ', ' + fx.lumens + ' lm at ' + fx.dim + ' %, ' + fx.beam + '° beam, ' + fx.cct + ' K, CRI ≥ 95', reason: why[role] + ' Position: ' + geo + ', mounted at ' + r1(fx.z) + ' m, aimed pan ' + r0(fx.pan) + '° / tilt ' + r0(fx.tilt) + '°. No existing aimable fixture is in a usable position for this role.' });
+            actions.push({ kind: 'add', fixtureId: fx.id, role, title: 'Add ' + role + ' light for ' + sb.name + ' — ' + TYPES[fx.type].label + ', ' + fx.lumens + ' lm at ' + fx.dim + ' %, ' + fx.beam + '° beam, ' + fx.cct + ' K, CRI ≥ 95', reason: why[role] + (['softbox', 'panel', 'fill'].includes(fx.type) && fx.beam <= 45 ? ' Fit a grid (honeycomb / egg-crate) to hold this narrow beam and keep spill off the neighbouring person.' : '') + ' Position: ' + geo + ', mounted at ' + r1(fx.z) + ' m, aimed pan ' + r0(fx.pan) + '° / tilt ' + r0(fx.tilt) + '°. No existing aimable fixture is in a usable position for this role.' });
           } else {
             const moved = Math.abs(fx.tilt - fx.rec.tilt) > 2 || Math.abs(((fx.pan - fx.rec.pan + 540) % 360) - 180) > 2;
             actions.push({ kind: moved ? 'reaim' : 'dim', fixtureId: fx.id, role, title: 'Reuse ' + fx.name + ' as ' + role + ' for ' + sb.name + ' — ' + (moved ? 're-aim to pan ' + r0(fx.rec.pan) + '° / tilt ' + r0(fx.rec.tilt) + '°, ' : '') + 'dim ' + r0(fx.rec.dim) + ' % (was ' + r0(fx.dim) + ' %)', reason: why[role] + ' It already sits ' + geo + ', so it is reused rather than replaced.' + (fx.cct > 0 && Math.abs(fx.cct - dc.cct) > 300 ? ' Its ' + fx.cct + ' K differs from the dominant ' + dc.cct + ' K — fit a correction gel/filter or swap the lamp.' : '') + (m.short ? ' Even at 100 % it delivers only about ' + r0(100 / m.short) + ' % of the level needed — consider a higher-output unit or moving it closer.' : '') });
@@ -1623,8 +1815,8 @@ const Plan2D = (() => {
 
   function layout(room) {
     const w = Math.max(240, svg.clientWidth || 600), pad = 38, narrow = window.innerWidth <= 900;
-    const maxH = Math.max(260, narrow ? window.innerHeight * 0.55 : window.innerHeight - 210);
-    const h = clamp((w - 2 * pad) * room.W / room.L + 2 * pad, 240, maxH);
+    const maxH = narrow && hooks.maxH ? hooks.maxH() : Math.max(260, narrow ? window.innerHeight * 0.55 : window.innerHeight - 210);     // phones: the space above the bottom sheet
+    const h = clamp((w - 2 * pad) * room.W / room.L + 2 * pad, Math.min(240, maxH), maxH);
     if (svg.style.height !== h + 'px') svg.style.height = h + 'px';
     vw = w; vh = h;
     s = Math.min((w - 2 * pad) / room.L, (h - 2 * pad) / room.W);
@@ -2429,8 +2621,8 @@ const Camera = (() => {
       '<p class="hint simp">Take a photo from where your camera stands, then drag the box onto the face. The app tells you what to fix.</p>' +
       '<p class="hint adv">A camera image shows relative brightness after the camera’s own exposure, gain and tone curve. It can reveal clipping, contrast and left–right balance, but it cannot measure lux. Overlays are illustrative.</p>' +
       '<div class="row">' +
-      '<label class="btn filebtn primary">Take photo<input id="camShot" type="file" accept="image/*" capture="environment"></label>' +
-      '<label class="btn filebtn">Choose photos<input id="camFiles" type="file" accept="image/*" multiple></label>' +
+      '<label class="btn filebtn primary" data-ico="camera">Take photo<input id="camShot" type="file" accept="image/*" capture="environment"></label>' +
+      '<label class="btn filebtn" data-ico="image">Choose photos<input id="camFiles" type="file" accept="image/*" multiple></label>' +
       '<label class="btn filebtn adv">Upload video<input id="camVideo" type="file" accept="video/*"></label>' +
       '<label class="btn filebtn adv">Record video<input id="camVideoRec" type="file" accept="video/*" capture="environment"></label>' +
       '<button class="btn" id="camLive">Start live preview</button>' +
@@ -2745,7 +2937,7 @@ const UI = (() => {
   const { esc, pv, st, len, lx } = Fmt;
   const clamp = Engine.clamp;
 
-  const App = { project: null, sel: null, tab: 'guide', simple: true, step: 0, view: 'top', mode: 'after', show: { heat: true, beams: true, real: false }, res: { before: null, after: null }, preset: 'panel600' };
+  const App = { project: null, sel: null, tab: 'guide', simple: true, step: 0, view: 'top', sheet: 'half', mode: 'after', show: { heat: true, beams: true, real: false }, res: { before: null, after: null }, preset: 'panel600' };
   const TABS = [['guide', 'Start here'], ['room', 'Room'], ['scene', 'Scene'], ['fixtures', 'Fixtures'], ['results', 'Results'], ['advice', 'Advice'], ['verify', 'Verify'], ['camera', 'Camera'], ['report', 'Report'], ['method', 'Methodology'], ['selftest', 'Self-test']];
   /* Simple mode shows only these; Expert mode shows all of TABS. */
   const SIMPLE_TABS = [['guide', 'Guide'], ['fixtures', 'My lights'], ['camera', 'Camera'], ['report', 'Report']];
@@ -2753,7 +2945,26 @@ const UI = (() => {
     guide: '<path d="M10 6h10M10 12h10M10 18h10M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>',
     fixtures: '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/>',
     camera: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
-    report: '<path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h7"/>'
+    report: '<path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h7"/>',
+    // buttons
+    plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>',
+    chevR: '<path d="M9 6l6 6-6 6"/>', chevL: '<path d="M15 6l-6 6 6 6"/>',
+    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',
+    dots: '<circle cx="6" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="18" cy="12" r="1.4" fill="currentColor"/>',
+    printer: '<path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2M7 14h10v6H7z"/>',
+    refresh: '<path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5"/>',
+    undo: '<path d="M9 14l-5-5 5-5M4 9h10a6 6 0 0 1 0 12h-3"/>', redo: '<path d="M15 14l5-5-5-5M20 9H10a6 6 0 0 0 0 12h3"/>',
+    menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+    personplus: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5M19 8v6M16 11h6"/>',
+    moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
+    sliders: '<path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.5"/><circle cx="8" cy="17" r="2.5"/>',
+    folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+    download: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
+    doc: '<path d="M7 3h7l5 5v13H7zM14 3v5h5M13 11v6M10 14h6"/>',
+    image: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="15.5" cy="9.5" r="1.5"/>',
+    sparkle: '<path d="M11 3l1.9 5.6L18.5 10.5l-5.6 1.9L11 18l-1.9-5.6L3.5 10.5l5.6-1.9zM19 15v5M16.5 17.5h5"/>',
+    gauge: '<path d="M4 17a8 8 0 1 1 16 0M12 17l4-6"/>'
   };
   const icon = k => ICON[k] ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICON[k] + '</svg>' : '';
   const WIDE = new Set(['camera', 'report', 'method', 'selftest']);       // tabs that use the full width (plan hidden)
@@ -2761,9 +2972,13 @@ const UI = (() => {
   let handlers = [], saveTimer = 0, toastTimer = 0, saveWarned = false, ptrDown = false, pendingPanel = false;
   const reg = fn => handlers.push(fn) - 1;
 
-  function toast(text) {
-    const t = $('toast'); t.textContent = text; t.classList.add('show');
-    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 4200);
+  /* Short message at the bottom. With 'undo', it carries an Undo button for the change that was just made. */
+  function toast(text, undo) {
+    const t = $('toast');
+    t.innerHTML = '<span>' + esc(text) + '</span>' + (undo ? '<button type="button">Undo</button>' : '');
+    if (undo) t.querySelector('button').addEventListener('click', () => { t.classList.remove('show'); applyHistory(Data.undo()); });
+    t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), undo ? 6000 : 4200);
   }
 
   /* ------------------------------------------------------------------
@@ -2801,7 +3016,7 @@ const UI = (() => {
     const p = P();
     if (p.autoRec && !o.noRec) genRecs();
     compute();
-    if (!o.live) Data.snapshot(p);
+    if (!o.live) { Data.snapshot(p); for (const id of ['plan', 'plan3d']) { const el = $(id); el.classList.remove('pulse'); void el.getBoundingClientRect(); el.classList.add('pulse'); } }
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => { if (!Data.save(P()) && !saveWarned) { saveWarned = true; toast('Autosave is unavailable in this browser context — use Save to keep your project.'); } }, 400);
     render(o);
@@ -2809,6 +3024,7 @@ const UI = (() => {
   function render(o = {}) {
     document.body.classList.toggle('wide', WIDE.has(App.tab));
     document.body.classList.toggle('simple', App.simple);
+    applySheet();
     Plan2D.render(App);
     renderView();
     renderChrome();
@@ -2834,7 +3050,7 @@ const UI = (() => {
   }
   function select(kind, id) {
     App.sel = kind ? { kind, id } : null;
-    if (kind && App.simple) { if (kind === 'fixture') App.tab = 'fixtures'; }      // Simple mode: only lights have an editor
+    if (kind && App.simple) { if (App.sheet === 'peek') App.sheet = 'half'; }      // Simple mode: the selection is edited in place (see renderQuick)
     else if (kind && !['results', 'advice'].includes(App.tab)) {
       const want = kind === 'fixture' ? 'fixtures' : kind === 'point' ? 'verify' : kind === 'table' ? 'room' : 'scene';
       if (!(kind === 'fixture' && App.tab === 'verify')) App.tab = want;
@@ -2878,8 +3094,11 @@ const UI = (() => {
     });
     const input = '<input type="number" inputmode="decimal" step="any" data-h="' + id + '" value="' + shown + '" aria-label="' + esc(label) + '"' + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') + '>';
     if (o.bare) return input;
-    return '<div class="f' + (o.cls ? ' ' + o.cls : '') + '"><span><span>' + label + (unit ? ' <small>' + unit + '</small>' : '') + '</span>' + (o.prov && !o.hideProv ? provSel(o.prov) : '') + '</span>' + input + '</div>';
+    return '<div class="f' + (o.cls ? ' ' + o.cls : '') + '"><span><span>' + label + (unit ? ' <small>' + unit + '</small>' : '') + '</span>' + (o.prov && !o.hideProv ? provSel(o.prov) : '') + '</span>' + (App.simple ? stepper(input, label, o.len ? (u === 'ft' ? 0.5 : 0.1) : ({ lumens: 100, K: 100, '%': 5, '°': 5 }[o.unit] || 1)) : input) + '</div>';
   }
+  /* − value + around a number field. The buttons change the field and fire its normal "change", so limits,
+     unit conversion and recalculation are exactly the same as when typing. Step: 0.1 m / 0.5 ft, 100 lm, 100 K, else 1. */
+  const stepper = (input, label, st) => '<div class="stepper"><button type="button" data-step="' + (-st) + '" aria-label="Decrease ' + esc(label) + '">' + icon('minus') + '</button>' + input + '<button type="button" data-step="' + st + '" aria-label="Increase ' + esc(label) + '">' + icon('plus') + '</button></div>';
   function fSel(label, value, opts, set, o = {}) {
     const id = reg(el => { set(el.value); if (!o.noCommit) commit(); });
     const sel = '<select data-h="' + id + '" aria-label="' + esc(label) + '">' + opts.map(([v, t]) => '<option value="' + esc(v) + '"' + (String(v) === String(value) ? ' selected' : '') + '>' + esc(t) + '</option>').join('') + '</select>';
@@ -2902,7 +3121,14 @@ const UI = (() => {
     const done = reg(el => { set(+el.value); commit(); });
     return '<div class="f wide"><span><span>' + label + '</span><output>' + Math.round(value) + unit + '</output></span><input type="range" min="' + min + '" max="' + max + '" step="' + step + '" value="' + value + '" data-i="' + live + '" data-h="' + done + '" aria-label="' + esc(label) + '"></div>';
   }
-  const btn = (label, fn, cls, title) => '<button class="btn small ' + (cls || '') + '" data-c="' + reg(fn) + '"' + (title ? ' title="' + esc(title) + '"' : '') + '>' + label + '</button>';
+  const BTN_ICON = [[/^(Next|I have no lights yet)$/, 'chevR', true], [/^Back$/, 'chevL'], [/^\+ /, 'plus'], [/^(Delete|Remove)/, 'trash'], [/^(Done$|I have (done|installed))/, 'check'],
+    [/^All settings/, 'sliders'], [/^More…/, 'dots'], [/Print/, 'printer'], [/camera check/, 'camera'], [/^Recalculate/, 'refresh'], [/my lights/, 'fixtures'], [/readings/, 'gauge'], [/^Full technical report/, 'report']];
+  const btn = (label, fn, cls, title) => {
+    const m = BTN_ICON.find(x => x[0].test(label)), text = label.replace(/^\+ /, '');
+    return '<button class="btn small ' + (cls || '') + '" data-c="' + reg(fn) + '"' + (title ? ' title="' + esc(title) + '"' : '') + '>' + (m && !m[2] ? icon(m[1]) : '') + text + (m && m[2] ? icon(m[1]) : '') + '</button>';
+  };
+  /* Fill the icon into every element that asks for one with data-ico (static markup, camera panel). */
+  function decorate(root) { root.querySelectorAll('[data-ico]').forEach(el => { if (!el.dataset.icoDone) { el.insertAdjacentHTML('afterbegin', icon(el.dataset.ico)); el.dataset.icoDone = '1'; } }); }
   const modeSeg = () => '<span class="seg">' + '<button data-c="' + reg(() => { App.mode = 'before'; render(); }) + '" class="' + (App.mode === 'before' ? 'on' : '') + '">' + (App.simple ? 'Now' : 'Before') + '</button><button data-c="' + reg(() => { App.mode = 'after'; render(); }) + '" class="' + (App.mode === 'after' ? 'on' : '') + '">' + (App.simple ? 'With plan' : 'After') + '</button></span>';
   const li = arr => arr.length ? '<ul style="margin:4px 0;padding-left:20px">' + arr.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' : '<p class="hint">None.</p>';
 
@@ -2917,10 +3143,12 @@ const UI = (() => {
     $('modeBefore').className = App.mode === 'before' ? 'on' : ''; $('modeAfter').className = App.mode === 'after' ? 'on' : '';
     $('tglHeat').classList.toggle('on', App.show.heat); $('tglBeams').classList.toggle('on', App.show.beams); $('tglReal').classList.toggle('on', App.show.real);
     $('modeBefore').textContent = App.simple ? 'Now' : 'Before'; $('modeAfter').textContent = App.simple ? 'With plan' : 'After';
-    $('btnExpert').textContent = 'Expert mode: ' + (App.simple ? 'off' : 'on');
+    $('expertLbl').textContent = 'Expert mode: ' + (App.simple ? 'off' : 'on');
     const tabs = App.simple ? SIMPLE_TABS.slice() : TABS;
     if (!tabs.some(t => t[0] === App.tab)) tabs.push(TABS.find(t => t[0] === App.tab));      // a hidden tab opened through a link
-    $('tabs').innerHTML = tabs.map(([k, t]) => '<button data-tab="' + k + '" class="' + (App.tab === k ? 'on' : '') + '">' + icon(k) + '<span>' + t + '</span></button>').join('');
+    // On wide screens the guide's steps are listed under "Guide" in the sidebar (hidden by CSS elsewhere).
+    const sub = '<div class="substeps">' + stepState().map(s => '<button data-tab="guide" data-step="' + s.n + '" class="' + (s.done ? 'done ' : '') + (App.tab === 'guide' && App.step === s.n ? 'on' : '') + '"><span class="sn">' + (s.done ? '✓' : s.n) + '</span><span>' + s.title + '</span></button>').join('') + '</div>';
+    $('tabs').innerHTML = tabs.map(([k, t]) => '<button data-tab="' + k + '" class="' + (App.tab === k ? 'on' : '') + '">' + icon(k) + '<span>' + t + '</span></button>' + (k === 'guide' ? sub : '')).join('');
 
     const r = App.res[App.mode], other = App.res[App.mode === 'after' ? 'before' : 'after'];
     if (App.simple) { $('score').innerHTML = simpleStatus(r, hasRec); return; }
@@ -2945,7 +3173,17 @@ const UI = (() => {
     const planned = App.mode === 'after' && hasRec, n = (P().rec.actions || []).length;
     const title = cls === 'pass' ? (planned ? 'Looks good with the plan' : 'Lighting looks good') : nBad ? nBad + (nBad === 1 ? ' thing' : ' things') + ' to fix' : 'Almost there';
     const sub = planned ? n + (n === 1 ? ' change' : ' changes') + ' to make — tap to see' : 'the room as it is now — tap for the plan';
-    return '<button class="hero ' + cls + '" data-tab="guide" data-step="4"><span class="hi"><span>' + (cls === 'pass' ? '✓' : '!') + '</span></span><span><b>' + title + '</b><small>' + sub + '</small></span></button>' +
+    // Ring: share of the graded checks that are inside their target (an "almost" counts half). It starts from the
+    // previous value and is moved to the new one on the next frame, so the change is animated.
+    // Any remaining problem (including warnings that are not numeric checks, such as a window behind the person) keeps it from closing.
+    const gr = r.checks.filter(graded);
+    let frac = gr.length ? gr.reduce((s, c) => s + (c.status === 'pass' ? 1 : c.status === 'warn' ? 0.5 : 0), 0) / gr.length : 0;
+    if (v.length) frac = Math.min(frac, 1 - Math.min(0.9, (nBad + 0.5 * (v.length - nBad)) / 7));
+    const CIRC = 2 * Math.PI * 18, from = App.ring == null ? 0 : App.ring;
+    App.ring = frac;
+    requestAnimationFrame(() => { const a = document.querySelector('.ring .arc'); if (a) a.style.strokeDashoffset = (CIRC * (1 - frac)).toFixed(1); });
+    const ring = '<span class="ring"><svg viewBox="0 0 42 42" aria-hidden="true"><circle class="trk" cx="21" cy="21" r="18"/><circle class="arc" cx="21" cy="21" r="18" stroke-dasharray="' + CIRC.toFixed(1) + '" stroke-dashoffset="' + (CIRC * (1 - from)).toFixed(1) + '"/></svg><b>' + (cls === 'pass' ? '✓' : v.length) + '</b></span>';
+    return '<button class="hero ' + cls + '" data-tab="guide" data-step="4" aria-label="' + esc(title) + '">' + ring + '<span><b>' + title + '</b><small>' + sub + '</small></span></button>' +
       pill('Face brightness', word(C('evFace'), 'Too dark', 'Too bright')) + pill('Shadows on face', word(C('keyFill'), 'Too flat', 'Too harsh')) +
       pill('Stands out from background', word(C('backKey'), 'Too little', 'Too much')) + pill('Colour', colour);
   }
@@ -2956,12 +3194,80 @@ const UI = (() => {
     render();
   }
 
+  /* The five guide steps and whether each is done (shared by the sidebar and the guide). */
+  function stepState() {
+    const p = P(), g = p.guide || {};
+    return [['Your room', p.room.prov.dims !== 'Assumed' || !!g.room], ['What are you filming?', !!g.scene], ['Lights you already have', !!g.fixtures], ['Your lighting plan', !!g.acted], ['Check on camera', !!g.checked]].map((s, i) => ({ n: i + 1, title: s[0], done: s[1] }));
+  }
+  /* ---- bottom sheet (phones): three heights; drag the grabber, or tap it to step through them ---- */
+  const isPhone = () => window.innerWidth <= 900;
+  const TABBAR = 56;
+  const sheetPx = d => { const H = window.innerHeight; return d === 'peek' ? 96 : d === 'full' ? Math.max(200, H - 64 - TABBAR) : Math.round(H * 0.42); };
+  let sheetNow = 0;                                 // current height in px (0 = not a sheet)
+  function applySheet() {
+    const el = $('sidePane');
+    if (!isPhone()) { el.style.height = ''; sheetNow = 0; return; }
+    sheetNow = sheetPx(WIDE.has(App.tab) ? 'full' : App.sheet);      // camera, report … have no plan to show: use the whole height
+    if (!el.classList.contains('dragging')) el.style.height = sheetNow + 'px';
+  }
+  /* Height the plan may use on a phone: from its top edge down to the top of the sheet. */
+  function planMaxH() {
+    const top = $('plan').getBoundingClientRect().top || $('plan3d').getBoundingClientRect().top || 190;
+    return Math.max(170, window.innerHeight - top - sheetNow - TABBAR - 10);
+  }
+  function initSheet() {
+    const el = $('sidePane'), grab = $('grab');
+    let d = null;
+    grab.addEventListener('pointerdown', e => { d = { y: e.clientY, h: el.getBoundingClientRect().height, moved: false }; el.classList.add('dragging'); try { grab.setPointerCapture(e.pointerId); } catch (x) { /* ignore */ } e.preventDefault(); });
+    grab.addEventListener('pointermove', e => { if (!d) return; if (Math.abs(e.clientY - d.y) > 5) d.moved = true; el.style.height = clamp(d.h + d.y - e.clientY, sheetPx('peek'), sheetPx('full')) + 'px'; });
+    const up = e => {
+      if (!d) return;
+      const hNow = el.getBoundingClientRect().height, moved = d.moved; d = null;
+      el.classList.remove('dragging');
+      if (moved) App.sheet = ['peek', 'half', 'full'].reduce((a, b) => Math.abs(sheetPx(b) - hNow) < Math.abs(sheetPx(a) - hNow) ? b : a);
+      else App.sheet = App.sheet === 'peek' ? 'half' : App.sheet === 'half' ? 'full' : 'half';
+      render({ light: true });
+      try { grab.releasePointerCapture(e.pointerId); } catch (x) { /* ignore */ }
+    };
+    grab.addEventListener('pointerup', up); grab.addEventListener('pointercancel', up);
+    grab.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); App.sheet = App.sheet === 'peek' ? 'half' : App.sheet === 'half' ? 'full' : 'peek'; render({ light: true }); } });
+    window.addEventListener('resize', () => { if (App.res.after) render({ light: true }); });
+  }
+  /* ---- in-place editor for whatever is selected on the plan (Simple mode) ----
+     Shown above the current panel; on a phone that is the top of the bottom sheet. */
+  function renderQuick() {
+    const q = $('quick'), p = P(), s = App.sel;
+    let html = '';
+    if (App.simple && s && !WIDE.has(App.tab)) {
+      const done = btn('Done', () => { App.sel = null; render(); });
+      if (s.kind === 'fixture' && App.tab !== 'fixtures') {
+        const f = p.fixtures.find(x => x.id === s.id);
+        if (f) {
+          const S = fn => v => { fn(v); if (!f.existing) manual(); };
+          html = '<div class="qh"><span class="dot' + (!f.enabled ? ' off' : f.existing ? '' : ' rec') + '"></span><b>' + esc(f.name) + '</b>' + (f.existing ? '' : '<span class="tag rc">To add</span>') + '<span class="spacer" style="flex:1"></span>' + done + '</div><div class="grid">' +
+            (f.dist === 'file' || f.outputMode === 'candela' ? '' : fNum('Brightness', f.lumens, S(v => { f.lumens = v; }), { unit: 'lumens', nullable: true, min: 0, prov: { obj: f.prov, key: 'output' }, hideProv: true })) +
+            fNum('Colour', f.cct, S(v => { f.cct = v; }), { unit: 'K', nullable: true, min: 1500, max: 12000, prov: { obj: f.prov, key: 'cct' }, hideProv: true }) +
+            fRange('Dimmer', f.dim, S(v => { f.dim = v; }), 0, 100, 1, ' %') + '</div><div class="row">' + fCheck('Switched on', f.enabled, S(v => { f.enabled = v; })) + '<span class="spacer"></span>' +
+            btn('More…', () => { App.tab = 'fixtures'; render(); }) + btn('Delete', () => { p.fixtures.splice(p.fixtures.indexOf(f), 1); if (!f.existing) manual(); App.sel = null; commit(); toast('“' + f.name + '” deleted.', true); }, 'danger') + '</div>';
+        }
+      } else if (s.kind === 'presenter') {
+        const pr = p.presenters.find(x => x.id === s.id);
+        if (pr) html = '<div class="qh"><span class="dot" style="background:var(--person)"></span><b>' + esc(pr.name) + '</b><span class="spacer" style="flex:1"></span>' + done + '</div><div class="grid">' + fText('Name', pr.name, v => { pr.name = v; }, { cls: 'wide' }) + '</div><div class="row"><small>Drag on the plan to move.</small><span class="spacer"></span>' +
+          (p.presenters.length > 1 ? btn('Remove', () => { p.presenters.splice(p.presenters.indexOf(pr), 1); App.sel = null; commit(); toast(pr.name + ' removed.', true); }, 'danger') : '') + '</div>';
+      } else if (s.kind === 'camera') {
+        const c = p.cameras.find(x => x.id === s.id);
+        if (c) html = '<div class="qh"><span class="dot" style="background:var(--cam);border-radius:3px"></span><b>' + esc(c.name) + '</b><span class="spacer" style="flex:1"></span>' + done + '</div><small>Drag the camera to move it. Drag the small ◇ in front of it to turn it.</small>';
+      }
+    }
+    q.hidden = !html; q.innerHTML = html;
+  }
   function renderPanel() {
     pendingPanel = false;
     const panel = $('panel'), cam = $('camPanel'), isCam = App.tab === 'camera';
     panel.hidden = isCam; cam.hidden = !isCam;
     if (isCam) {
-      if (!Camera.isMounted()) Camera.mount(cam, { predicted: predictedForCamera, simple: () => App.simple }); else Camera.refresh();
+      if (!Camera.isMounted()) { Camera.mount(cam, { predicted: predictedForCamera, simple: () => App.simple }); decorate(cam); } else Camera.refresh();
+      handlers = []; renderQuick();
       return;
     }
     const ae = document.activeElement;
@@ -2969,6 +3275,7 @@ const UI = (() => {
     if (ae && panel.contains(ae)) key = ae.dataset.h != null ? '[data-h="' + ae.dataset.h + '"]' : ae.dataset.c != null ? '[data-c="' + ae.dataset.c + '"]' : null;
     handlers = [];
     panel.innerHTML = PANELS[App.tab]();
+    renderQuick();
     if (key) { const el = panel.querySelector(key); if (el) el.focus({ preventScroll: true }); }
   }
   function predictedForCamera() {
@@ -3001,6 +3308,8 @@ const UI = (() => {
     back: ['hair light', 'This puts a thin rim of light on hair and shoulders so the person stands out from the background.'],
     ambient: ['ceiling light', 'This is general room light, so the table and room are bright enough.']
   };
+  /* A soft source (softbox / panel) only holds a beam of 45° or less with a grid on its front; spots are narrow by design. */
+  const needsGrid = f => ['softbox', 'panel', 'fill'].includes(f.type) && f.beam <= 45;
   /* Plain-language verdicts for one evaluated state. Returns [{sev, text, fix}]. */
   function plainVerdicts(res) {
     const out = [], c = k => res.checks.find(x => x.key === k), rng = t => Fmt.target(t);
@@ -3046,7 +3355,7 @@ const UI = (() => {
         aim = who ? 'pointing at the face of ' + who : 'pointing as shown by the arrow on the plan';
       }
       const where = len(f.x, u) + ' from the left (west) wall, ' + len(f.y, u) + ' from the top (north) wall, ' + len(f.z, u) + ' above the floor';
-      if (ac.kind === 'add') items.push({ id: f.id, head: 'Buy and install a ' + (role ? role[0] : 'light') + ': ' + Engine.TYPES[f.type].label.toLowerCase(), lines: ['What to buy: a dimmable LED light giving at least ' + f.lumens + ' lumens (lm), colour ' + f.cct + ' K, CRI 95 or higher, beam about ' + f.beam + '°.', 'Where: ' + where + ', ' + aim + '.', 'Brightness: set its dimmer to about ' + Math.round(f.dim) + ' %.', role ? role[1] : ''] });
+      if (ac.kind === 'add') items.push({ id: f.id, head: 'Buy and install a ' + (role ? role[0] : 'light') + ': ' + Engine.TYPES[f.type].label.toLowerCase(), lines: ['What to buy: a dimmable LED light giving at least ' + f.lumens + ' lumens (lm), colour ' + f.cct + ' K, CRI 95 or higher, beam about ' + f.beam + '°.', needsGrid(f) ? 'Fit a grid (also sold as honeycomb or egg-crate) on the front of this light. It keeps the beam this narrow so the light does not spill onto the next person.' : '', 'Where: ' + where + ', ' + aim + '.', 'Brightness: set its dimmer to about ' + Math.round(f.dim) + ' %.', role ? role[1] : ''] });
       else if (ac.kind === 'reaim') items.push({ id: f.id, head: 'Re-aim a light you already have: ' + f.name, lines: ['Turn it so it is ' + aim + ', and set it to about ' + Math.round(e.dim) + ' % brightness.', role ? 'It becomes your ' + role[0] + '. ' + role[1] : '', 'No purchase needed.'] });
       else items.push({ id: f.id, head: (e.dim > 0 ? 'Change brightness of ' : 'Switch off ') + f.name, lines: [e.dim > 0 ? 'Set it to about ' + Math.round(e.dim) + ' % (it is at ' + Math.round(f.dim) + ' % now).' : 'Switch it off while filming, or point it away from faces.', 'No purchase needed.'] });
     }
@@ -3057,7 +3366,7 @@ const UI = (() => {
   function pausedNote() {
     if (P().autoRec) return '';
     return '<div class="note warn"><b>The plan is no longer updating by itself</b> because you changed a suggested light by hand.<div class="row" style="margin-top:8px">' +
-      btn('Recalculate the plan', () => { P().autoRec = true; commit(); toast('Plan recalculated. It will keep updating as you move things.'); }, 'primary') + '</div><small>This replaces your hand-made changes to suggested lights. Lights you already have are not touched.</small></div>';
+      btn('Recalculate the plan', () => { P().autoRec = true; commit(); toast('Plan recalculated. It will keep updating as you move things.', true); }, 'primary') + '</div><small>This replaces your hand-made changes to suggested lights. Lights you already have are not touched.</small></div>';
   }
   /* The guide is a five-step wizard: one step is open at a time (App.step). */
   PANELS.guide = () => {
@@ -3068,23 +3377,26 @@ const UI = (() => {
     const done = [false, r.prov.dims !== 'Assumed' || !!g.room, !!g.scene, !!g.fixtures, !!g.acted, !!g.checked];
     if (!App.step) { App.step = 1; while (App.step < N && done[App.step]) App.step++; }
     const cur = App.step;
-    const showStep = () => setTimeout(() => { const el = document.querySelector('.step.open'); if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 0);
+    const showStep = () => setTimeout(() => { const sb = $('sheetBody'); if (sb.scrollHeight > sb.clientHeight) sb.scrollTo({ top: 0, behavior: 'smooth' }); else { const el = document.querySelector('.prog'); if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } }, 0);
     const go = (tab, label, cls) => btn(label, () => setTab(tab), cls);
     const nav = (n, flag, label) => '<div class="row stepnav">' + (n > 1 ? btn('Back', () => { App.step = n - 1; render(); showStep(); }) : '') + '<span class="spacer"></span>' +
       btn(label || 'Next', () => { if (flag) g[flag] = true; App.step = Math.min(N, n + 1); commit({ noRec: true }); showStep(); }, 'primary') + '</div>';
-    const step = (n, title, sum, body) => {
-      const open = cur === n;
-      return '<div class="step' + (done[n] ? ' done' : '') + (open ? ' open' : '') + '"><button class="sh" aria-expanded="' + open + '" data-c="' + reg(() => { App.step = n; render(); }) + '"><span class="sn">' + (done[n] ? '✓' : n) + '</span><span class="st-t">' + title + '</span>' + (!open && sum ? '<small>' + esc(sum) + '</small>' : '') + '</button>' + (open ? '<div class="sb">' + body + '</div>' : '') + '</div>';
-    };
+    // Only the current step is shown, with a large title. It slides in when the step changes (not on every recalculation).
+    const enter = App.shownStep && App.shownStep !== cur ? (cur > App.shownStep ? ' enter' : ' enter back') : '';
+    App.shownStep = cur;
+    const step = (n, title, sum, body) => n !== cur ? '' :
+      '<div class="stepview' + enter + '"><p class="eyebrow">Step ' + n + ' of ' + N + (done[n] ? ' <span class="ok">· done</span>' : '') + '</p><h3>' + title + '</h3>' + body + '</div>';
     const plain = t => t.replace(/ \([^)]*\)/g, '');                 // drop the numbers in brackets
     const pickScene = id => {
       const fresh = !g.scene || p.scenarioId !== id;
       p.scenarioId = id; g.scene = true; App.sel = null;
-      if (fresh) { Object.assign(p, Engine.scenarioLayout(id, p.room, p.bgWall)); toast('People and camera placed. Drag them on the plan to match your room.'); }
+      if (fresh) { Object.assign(p, Engine.scenarioLayout(id, p.room, p.bgWall)); }
       commit();
+      if (fresh) toast('People and camera placed. Drag them on the plan to match your room.', true);
     };
 
-    let h = '<section><h3>Better video lighting in 5 steps</h3><div class="prog">' + [1, 2, 3, 4, 5].map(n => '<i class="' + (done[n] ? 'done' : n === cur ? 'cur' : '') + '"></i>').join('') + '</div>';
+    const names = stepState();
+    let h = '<section><div class="prog">' + [1, 2, 3, 4, 5].map(n => '<button class="' + (n === cur ? 'cur' : done[n] ? 'done' : '') + '" title="' + n + '. ' + names[n - 1].title + '" aria-label="Step ' + n + ': ' + names[n - 1].title + '" data-c="' + reg(() => { App.step = n; render(); }) + '"></button>').join('') + '</div>';
 
     h += step(1, 'Your room', len(r.L, u) + ' × ' + len(r.W, u), '<p>Measure with a tape and type the sizes in.</p><div class="grid g3">' +
       fNum('Length', r.L, v => { r.L = v; r.prov.dims = 'User'; fitToRoom(); }, { len: true, min: 1, max: 60 }) + fNum('Width', r.W, v => { r.W = v; r.prov.dims = 'User'; fitToRoom(); }, { len: true, min: 1, max: 60 }) + fNum('Ceiling height', r.H, setCeiling, { len: true, min: 1.8, max: 20 }) + '</div>' + nav(1, 'room'));
@@ -3092,7 +3404,7 @@ const UI = (() => {
     h += step(2, 'What are you filming?', (PLAIN_SCENARIO[p.scenarioId] || '').split(' (')[0].split(' — ')[0], '<div class="list">' +
       Object.keys(Engine.SCENARIOS).map(id => '<div class="item wrap' + (p.scenarioId === id ? ' sel' : '') + '" data-c="' + reg(() => pickScene(id)) + '"><span class="radio"></span><div class="t"><b>' + esc(PLAIN_SCENARIO[id] || Engine.SCENARIOS[id].name) + '</b></div></div>').join('') + '</div>' +
       '<p style="margin-top:12px">Now <b>drag</b> each person and the camera on the plan to where they really are.</p><div class="row">' +
-      p.presenters.map((q, i) => '<span class="who">' + esc(q.name) + (p.presenters.length > 1 ? '<button aria-label="Remove ' + esc(q.name) + '" title="Remove" data-c="' + reg(() => { p.presenters.splice(i, 1); App.sel = null; commit(); }) + '">×</button>' : '<span style="width:8px"></span>') + '</span>').join('') +
+      p.presenters.map((q, i) => '<span class="who">' + esc(q.name) + (p.presenters.length > 1 ? '<button aria-label="Remove ' + esc(q.name) + '" title="Remove" data-c="' + reg(() => { p.presenters.splice(i, 1); App.sel = null; commit(); toast(q.name + ' removed.', true); }) + '">×</button>' : '<span style="width:8px"></span>') + '</span>').join('') +
       btn('+ Person', addPresenter) + '</div>' + nav(2, 'scene'));
 
     h += step(3, 'Lights you already have', nOwn + (nOwn === 1 ? ' light' : ' lights'), '<p>Add every light that is in the room now and drag it to its place on the plan.</p><p>Copy two numbers from the lamp or its box: <b>lumens (lm)</b> = how bright, <b>Kelvin (K)</b> = how warm or cool.</p><div class="row">' +
@@ -3395,7 +3707,7 @@ const UI = (() => {
     if (todo.length) h += todo.map((t, i) => '<div class="act ' + (/^Buy/.test(t.head) ? '' : 'reaim') + '" style="margin-bottom:8px;cursor:default"><b>' + (i + 1) + '. ' + esc(t.head) + '</b>' + t.lines.filter(Boolean).map(l => '<p>' + esc(l) + '</p>').join('') + '</div>').join('');
     else h += now.length ? '<ul>' + now.map(v => '<li>' + esc(v.fix) + '</li>').join('') + '</ul>' : '<p>Nothing to change.</p>';
     if (buy.length) h += '<h2>Shopping list</h2><div class="tw"><table><thead><tr><th>Light</th><th class="num">Brightness</th><th class="num">Colour</th><th class="num">Colour quality</th><th class="num">Beam</th></tr></thead><tbody>' +
-      buy.map(f => '<tr><td><b>' + esc((PLAIN_ROLE[f.role] || [Engine.TYPES[f.type].label])[0]) + '</b><br><small>' + esc(Engine.TYPES[f.type].label) + ', dimmable LED</small></td><td class="num">at least ' + Math.round(f.lumens) + ' lm</td><td class="num">' + Math.round(f.cct) + ' K</td><td class="num">CRI 95+</td><td class="num">about ' + Math.round(f.beam) + '°</td></tr>').join('') + '</tbody></table></div>';
+      buy.map(f => '<tr><td><b>' + esc((PLAIN_ROLE[f.role] || [Engine.TYPES[f.type].label])[0]) + '</b><br><small>' + esc(Engine.TYPES[f.type].label) + ', dimmable LED</small></td><td class="num">at least ' + Math.round(f.lumens) + ' lm</td><td class="num">' + Math.round(f.cct) + ' K</td><td class="num">CRI 95+</td><td class="num">about ' + Math.round(f.beam) + '°' + (needsGrid(f) ? '<br><small>with a grid fitted</small>' : '') + '</td></tr>').join('') + '</tbody></table></div>';
     if (todo.length) h += '<h2>Expected result</h2>' + (left.length ? '<div class="note warn"><b>Still to sort out afterwards:</b><ul>' + left.map(v => '<li>' + esc(plain(v.text)) + ' ' + esc(v.fix) + '</li>').join('') + '</ul></div>' : '<div class="note ok"><b>After these changes the lighting is on target.</b></div>');
     h += '<h2>Camera settings</h2><ul><li><b>White balance:</b> ' + (ks.length === 1 ? ks[0] + ' K' : 'the K number of your lights') + ', not auto</li><li><b>Exposure:</b> locked</li><li><b>Shutter:</b> 1/50 (50 Hz mains) or 1/60 (60 Hz mains)</li><li><b>ISO / gain:</b> as low as it goes</li></ul>';
     return h + '<p class="hint">This is a planning estimate. Confirm it with a test recording before the real one.</p></div>';
@@ -3473,6 +3785,24 @@ const UI = (() => {
     if (list && list.some(o => o.id === s.id)) App.sel = s;
     compute(); Data.save(p); render();
   }
+  /* Welcome screen: shown on first open and for "New project". Picking what you film starts an empty room for it. */
+  function showWelcome(canCancel) {
+    $('welcomePick').innerHTML = Object.keys(Engine.SCENARIOS).map(id => '<button data-sc="' + id + '">' + esc(PLAIN_SCENARIO[id] || Engine.SCENARIOS[id].name) + '</button>').join('');
+    $('welcomeClose').hidden = !canCancel;
+    $('welcome').hidden = false; $('welcome').scrollTop = 0;
+  }
+  function startProject(scId) {
+    const p = Data.defaultProject();
+    if (scId) {                                   // the user's own room: no lights yet, people and camera placed for the chosen kind of shoot
+      p.name = 'My room'; p.fixtures = []; p.scenarioId = scId;
+      Object.assign(p, Engine.scenarioLayout(scId, p.room, p.bgWall));
+      p.guide = { scene: true };
+    }
+    setProject(p); Data.resetHistory();
+    App.tab = 'guide'; App.step = 1; App.shownStep = 0; App.ring = null; App.sheet = 'half';
+    $('welcome').hidden = true;
+    commit();
+  }
   function setTheme(t) { document.documentElement.setAttribute('data-theme', t); Data.setTheme(t); if (App.project) render(); }
 
   /* ------------------------------------------------------------------
@@ -3480,10 +3810,11 @@ const UI = (() => {
      ------------------------------------------------------------------ */
   function boot() {
     document.documentElement.setAttribute('data-theme', Data.getTheme() || (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
-    setProject(Data.load() || Data.defaultProject());
+    const saved = Data.load();
+    setProject(saved || Data.defaultProject());
     App.simple = Data.getPref('mode') !== 'expert'; App.show.heat = !App.simple; App.show.real = Data.getPref('real') === '1';
     Plan2D.init($('plan'), {
-      app: () => App, redraw: () => { if (App.res.after) { Plan2D.render(App); renderView(); } }, manual,
+      app: () => App, redraw: () => { if (App.res.after) { Plan2D.render(App); renderView(); } }, manual, maxH: planMaxH,
       live: () => commit({ live: true }), end: (kind, id) => { App.sel = { kind, id }; commit(); }, select
     });
 
@@ -3508,7 +3839,10 @@ const UI = (() => {
     $('unitM').addEventListener('click', () => { P().units = 'm'; commit({ noRec: true }); });
     $('unitFt').addEventListener('click', () => { P().units = 'ft'; commit({ noRec: true }); });
     $('btnTheme').addEventListener('click', () => setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
-    $('btnNew').addEventListener('click', () => { if (confirm('Start a new project? The current one stays available through Undo, or Save it first.')) { setProject(Data.defaultProject()); App.tab = 'guide'; App.step = 1; commit(); } });
+    $('btnNew').addEventListener('click', () => showWelcome(true));
+    $('welcomePick').addEventListener('click', e => { const b = e.target.closest('[data-sc]'); if (b) startProject(b.getAttribute('data-sc')); });
+    $('welcomeSample').addEventListener('click', () => startProject(null));
+    $('welcomeClose').addEventListener('click', () => { $('welcome').hidden = true; });
     $('fileProject').addEventListener('change', e => openFile(e.target));
     $('btnExpert').addEventListener('click', () => setSimple(!App.simple));
     $('menu').addEventListener('click', e => { if (e.target.closest('.menupop .btn')) $('menu').open = false; });
@@ -3532,6 +3866,23 @@ const UI = (() => {
       if ((e.ctrlKey || e.metaKey) && k === 'z' && !e.shiftKey) { e.preventDefault(); applyHistory(Data.undo()); }
       else if ((e.ctrlKey || e.metaKey) && (k === 'y' || (k === 'z' && e.shiftKey))) { e.preventDefault(); applyHistory(Data.redo()); }
     });
+    // the in-place editor uses the same handler registry as the panel
+    const quick = $('quick');
+    quick.addEventListener('change', e => { const el = e.target.closest('[data-h]'); if (el && handlers[+el.dataset.h]) handlers[+el.dataset.h](el, e); });
+    quick.addEventListener('input', e => { const el = e.target.closest('[data-i]'); if (el && handlers[+el.dataset.i]) handlers[+el.dataset.i](el, e); });
+    quick.addEventListener('click', e => { const el = e.target.closest('[data-c]'); if (el && handlers[+el.dataset.c]) handlers[+el.dataset.c](el, e); });
+    initSheet();
+    // Offline cache: only when served over http(s); a page opened from disk (file://) has no service worker and needs none.
+    if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => { /* e.g. sw.js not deployed next to the page */ });
+    decorate(document);
+    document.addEventListener('click', e => {
+      const b = e.target.closest('.stepper [data-step]');
+      if (!b) return;
+      const inp = b.parentElement.querySelector('input'), v = parseFloat(inp.value);
+      inp.value = +((isFinite(v) ? v : 0) + +b.dataset.step).toFixed(3);
+      inp.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    if (!saved) showWelcome(false);
     window.addEventListener('pagehide', () => { Camera.pause(); Data.save(P()); });
     commit();
   }
