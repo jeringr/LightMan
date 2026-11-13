@@ -25,7 +25,7 @@ It is free, works offline, and runs entirely in your browser. Nothing is uploade
 
 ## Put it on an iPhone
 
-1. Open the app page (`LightIdea.html`) in Safari.
+1. Open the app page (`[LightIdea.html](https://jeringr.github.io/LightMan/)`) in Safari.
 2. Tap Share, then **Add to Home Screen**.
 3. Open it once from the new icon while online. After that it works with no connection.
 
